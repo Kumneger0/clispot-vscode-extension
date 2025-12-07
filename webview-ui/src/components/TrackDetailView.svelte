@@ -13,6 +13,7 @@
       tracksList: PlaylistTrackObject[],
     ) => void;
     onBack?: () => void;
+    currentlyPlayingTrack: PlaylistTrackObject | null;
   }
 
   let {
@@ -21,6 +22,7 @@
     context = "todo_context",
     playTrack,
     onBack,
+    currentlyPlayingTrack,
   }: Props = $props();
 </script>
 
@@ -56,5 +58,5 @@
     <p class="text-zinc-500 animate-pulse text-xs">Loading...</p>
   </div>
 {:else}
-  <TrackList {tracks} {playTrack} {context} />
+  <TrackList {currentlyPlayingTrack} {tracks} {playTrack} {context} />
 {/if}

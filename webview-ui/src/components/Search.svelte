@@ -21,6 +21,7 @@
       tracksList: PlaylistTrackObject[],
     ) => void;
     loadTracks: (itemId: string, type: TracksType) => void;
+    currentlyPlayingTrack:PlaylistTrackObject | null
     loading?: boolean;
   }
 
@@ -31,6 +32,7 @@
     handleSearch,
     tracks,
     playTrack,
+    currentlyPlayingTrack,
     loadTracks,
     loading = false,
   }: Props = $props();
@@ -102,6 +104,7 @@
           tracks={searchResults.tracks.items.map((track) => ({ track }))}
           {playTrack}
           context="todo_context"
+          {currentlyPlayingTrack}
         />
       {:else if (activeTab === "artists" || activeTab == "artists_view") && searchResults.artists.items?.length}
         {#if activeTab == "artists_view"}
@@ -111,6 +114,7 @@
             {loading}
             context="todo_context"
             onBack={() => (activeTab = "artists")}
+            {currentlyPlayingTrack}
           />
         {:else}
           <LibraryList
@@ -129,6 +133,7 @@
             {playTrack}
             {loading}
             context="todo_context"
+            {currentlyPlayingTrack}
             onBack={() => (activeTab = "albums")}
           />
         {:else}
@@ -144,6 +149,7 @@
       {:else if (activeTab === "playlists" || activeTab == "playlists_view") && searchResults.playlists.items?.length}
         {#if activeTab == "playlists_view"}
           <TrackDetailView
+            {currentlyPlayingTrack}
             {tracks}
             {playTrack}
             {loading}

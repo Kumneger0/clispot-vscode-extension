@@ -256,8 +256,6 @@
     });
   }
 
-
-
   declare const acquireVsCodeApi: () => WebviewApi<{}>;
   const vscode = acquireVsCodeApi();
 </script>
@@ -328,7 +326,7 @@
     index: number,
     tracksList: PlaylistTrackObject[],
   ) {
-    currentlyPlayingTrack = tracksList[index];
+    currentlyPlayingTrack = tracksList[index] || null;
     const data = {
       type: "playTrack",
       trackId,
@@ -365,7 +363,7 @@
           <p class="text-zinc-400 text-sm mb-1">No tracks</p>
         </div>
       {:else}
-        <TrackList {tracks} {playTrack} context="saved_tracks" />
+        <TrackList {currentlyPlayingTrack} {tracks} {playTrack} context="saved_tracks" />
       {/if}
     {/if}
 
@@ -404,6 +402,7 @@
 
     {#if activeTab === "playlist_view" || activeTab === "artist_view" || activeTab === "album_view"}
       <TrackDetailView
+        {currentlyPlayingTrack}
         {tracks}
         {playTrack}
         {loading}
@@ -421,6 +420,7 @@
 
     {#if activeTab === "search"}
       <Search
+        {currentlyPlayingTrack}
         bind:searchQuery
         {searchResults}
         {isSearching}

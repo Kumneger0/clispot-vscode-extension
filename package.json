@@ -47,21 +47,7 @@
         "command": "clispot.togglePlayPause",
         "title": "Toggle Play/Pause"
       }
-    ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "clispot.search",
-          "when": "view == clispotLibrary",
-          "group": "navigation"
-        },
-        {
-          "command": "clispot.refreshLibrary",
-          "when": "view == clispotLibrary",
-          "group": "navigation"
-        }
-      ]
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
