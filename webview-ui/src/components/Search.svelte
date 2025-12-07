@@ -45,6 +45,18 @@
     | "artists_view";
 
   let activeTab = $state<ActiveTabTypes>("playlists");
+
+
+  const tabs :{label: string, value: ActiveTabTypes}[] = [
+    { label: "Tracks", value: "tracks" },
+    { label: "Playlists", value: "playlists" },
+    { label: "Artists", value: "artists" },
+    { label: "Albums", value: "albums" },
+  ] 
+
+
+
+
 </script>
 
 <div class="p-4 flex flex-col h-full">
@@ -70,16 +82,16 @@
     </div>
   {:else if searchResults}
     <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-      {#each ["tracks", "artists", "albums", "playlists"] satisfies ActiveTabTypes[] as cat}
+      {#each tabs as {label, value}}
         <button
-          class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors {activeTab.startsWith(cat)
+          class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors {activeTab.startsWith(value)
             ? 'bg-white text-black'
             : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}"
-          onclick={() => (activeTab = cat)}
+          onclick={() => (activeTab = value)}
         >
-          {cat.charAt(0).toUpperCase() + cat.slice(1)} ({searchResults[
-            cat as keyof SearchResponse
-          ]?.total || 0})
+          {label} ({searchResults[
+            value as keyof SearchResponse
+          ]?.items?.length || 0})
         </button>
       {/each}
     </div>
@@ -125,7 +137,7 @@
             type="album"
             onSelect={(item) => {
               activeTab = "albums_view";
-              loadTracks(item.id, "album");
+              loadTracks(item.id, "album_tracks");
             }}
           />
         {/if}

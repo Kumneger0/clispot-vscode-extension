@@ -1,4 +1,4 @@
-export type TracksType = "playlist" | "followed_artist" | "saved_tracks" | "album";
+export type TracksType = "playlist" | "followed_artist" | "saved_tracks" | "album_tracks";
 
 export interface Image {
   url: string;

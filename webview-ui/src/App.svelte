@@ -397,7 +397,7 @@
         type="album"
         onSelect={(item) => {
           activeTab = "album_view";
-          loadTracks((item as Album).id, "album");
+          loadTracks((item as Album).id, "album_tracks");
         }}
       />
     {/if}
