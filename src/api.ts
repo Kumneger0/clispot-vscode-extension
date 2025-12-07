@@ -1,22 +1,16 @@
 import * as vscode from 'vscode';
-import { UserLibrary, TracksResponse, PlayRequestBody, TracksType, PlaylistTrackObject } from './types';
+import { UserLibrary, TracksResponse, PlayRequestBody, TracksType, PlaylistTrackObject, SearchResponse } from './types/types.js';
 
 const BASE_URL = 'http://localhost:8282'; 
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
     try {
         const response = await fetch(`${BASE_URL}${url}`, options);
-
         if (!response.ok) {
+            console.log("response status", response.status);
             let errorText = `HTTP error! Status: ${response.status}`;
-            try {
-                const errorBody = await response.json();
-                errorText += ` - ${JSON.stringify(errorBody)}`;
-            } catch (jsonError) {
-            }
             throw new Error(errorText);
         }
-
         return (await response.json()) as T;
     } catch (error: any) {
         vscode.window.showErrorMessage(`Failed to fetch from ${url}: ${error.message}`);
@@ -46,9 +40,7 @@ export async function togglePlayPause(): Promise<any> {
     return request<any>('/player');
 }
 
-export async function searchTracks(query: string): Promise<PlaylistTrackObject[]> {
-    console.log(`Search for: ${query}`);
-    return [];
-}
 
-// TODO: Implement SSE client for /events
+export async function Search(query:string): Promise<SearchResponse> {
+    return request<SearchResponse>(`/search?q=${query}`);
+}

@@ -1,7 +1,11 @@
 import * as vscode from "vscode";
-import { ClispotTreeDataProvider } from "./treeDataProvider";
-import { playTrack, togglePlayPause } from "./api";
-import { MusicQueue, PlayRequestBody, PlaylistTrackObject } from "./types";
+import { ClispotWebviewProvider } from "./webviewProvider.js";
+import { playTrack, togglePlayPause } from "./api.js";
+import {
+  MusicQueue,
+  PlayRequestBody,
+  PlaylistTrackObject,
+} from "./types/types.js";
 import { EventSource } from "eventsource"; // Import EventSource
 
 let clispotStatusBarItem: vscode.StatusBarItem;
@@ -15,30 +19,27 @@ let musicQueue: MusicQueue = {
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "clispot" is now active!');
 
-  const clispotTreeDataProvider = new ClispotTreeDataProvider();
-  vscode.window.registerTreeDataProvider(
-    "clispotLibrary",
-    clispotTreeDataProvider
+  const clispotWebviewProvider = new ClispotWebviewProvider(
+    context.extensionUri
   );
-
-  vscode.commands.registerCommand("clispot.refreshLibrary", () =>
-    clispotTreeDataProvider.refresh()
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      "clispotLibrary",
+      clispotWebviewProvider
+    )
   );
-
-  vscode.commands.registerCommand("clispot.search", async () => {
-    const query = await vscode.window.showInputBox({
-      placeHolder: "Search for a track, artist, or album",
-      prompt: "Enter your search query",
-    });
-
-    if (query) {
-      vscode.window.showInformationMessage(`You searched for: ${query}`);
-    }
-  });
 
   vscode.commands.registerCommand(
-    "clispot.playTrack",
-    async (currentIndex: number, items: PlaylistTrackObject[]) => {
+    "clispot.playTrackWebview",
+    async (data: {
+      trackId: string;
+      contextUri: string;
+      index: number;
+      tracks: any[];
+    }) => {
+      const items = data.tracks;
+      const currentIndex = data.index;
+
       const trackObj = items[currentIndex];
       if (!trackObj || !trackObj.track) {
         vscode.window.showInformationMessage(
@@ -48,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const track = trackObj.track;
-      const artists = track.artists.map((a) => a.name);
+      const artists = track.artists?.map((a: any) => a.name);
       const requestBody: PlayRequestBody = {
         trackID: track.id,
         name: track.name,
@@ -128,7 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
               return;
             }
             const track = nextTrack.track;
-            const artists = track.artists.map((a) => a.name);
+            const artists = track.artists?.map((a) => a.name);
             const requestBody: PlayRequestBody = {
               trackID: track.id,
               name: track.name,
@@ -138,9 +139,9 @@ export function activate(context: vscode.ExtensionContext) {
 
             await playTrack(requestBody);
             musicQueue.currentIndex = musicQueue.currentIndex + 1;
-              vscode.window.showInformationMessage(
-                `Playing: ${track.name} by ${artists.join(", ")}`
-              );
+            vscode.window.showInformationMessage(
+              `Playing: ${track.name} by ${artists.join(", ")}`
+            );
 
             currentPlayingTrackName = `${track.name} - ${artists.join(", ")}`;
             clispotStatusBarItem.text = `$(play) ${currentPlayingTrackName}`;
