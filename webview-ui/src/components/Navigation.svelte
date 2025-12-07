@@ -37,6 +37,13 @@
         : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}"
       onclick={() => (activeTab = "artists")}>Artists</button
     >
+    <button
+      class="flex-1 px-2 py-2 rounded-md text-xs font-medium transition-all duration-200 truncate {activeTab ===
+        'album' || activeTab === 'album_view'
+        ? 'bg-zinc-800 text-white'
+        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}"
+      onclick={() => (activeTab = "album")}>Albums</button
+    >
   </div>
 
   <button

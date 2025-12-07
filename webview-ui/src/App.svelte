@@ -11,12 +11,7 @@
 
   import type { WebviewApi } from "vscode-webview";
 
-  /**
- * 
- * 
-
-  
-  if (typeof acquireVsCodeApi === "undefined") {
+    if (typeof acquireVsCodeApi === "undefined") {
     (window as any).acquireVsCodeApi = () => ({
       postMessage: (message: any) => {
         console.log("Mock VS Code postMessage:", message);
@@ -30,6 +25,7 @@
                     { id: "1", name: "Mock Playlist 1", type: "playlist" },
                   ],
                   artist: [{ id: "2", name: "Mock Artist 1", type: "artist" }],
+                  album: [{ id: "3", name: "Mock Album 1", type: "album", images: [] }],
                 },
               },
               "*"
@@ -90,7 +86,7 @@
                         popularity: 0,
                       },
                     ],
-                    album: { name: "Search Album 1", images: [] },
+                    album: { name: "Search Album 1", images: [], id:'djdjd' },
                     duration_ms: 0,
                   },
                   {
@@ -110,7 +106,7 @@
                         popularity: 0,
                       },
                     ],
-                    album: { name: "Search Album 2", images: [] },
+                    album: { name: "Search Album 2", images: [], id:'jfjfjf' },
                     duration_ms: 0,
                   },
                 ],
@@ -157,8 +153,8 @@
                 previous: "",
                 total: 2,
                 items: [
-                  { name: "Search Album 1", images: [] },
-                  { name: "Search Album 2", images: [] },
+                  { name: "Search Album 1", images: [], id:'djdjdjjbb' },
+                  { name: "Search Album 2", images: [], id:'djdjd' },
                 ],
               },
               playlists: {
@@ -261,9 +257,6 @@
   }
 
 
-   * 
- * 
-*/
 
   declare const acquireVsCodeApi: () => WebviewApi<{}>;
   const vscode = acquireVsCodeApi();
@@ -275,18 +268,27 @@
   import TrackList from "./components/TrackList.svelte";
   import LibraryList from "./components/LibraryList.svelte";
   import Search from "./components/Search.svelte";
+  import TrackDetailView from "./components/TrackDetailView.svelte";
 
-  let activeTab = $state("saved_tracks");
-  let library = $state<UserLibrary>({ playlist: [], artist: [] });
+  let activeTab = $state<
+    | "saved_tracks"
+    | "playlists"
+    | "artists"
+    | "album"
+    | "album_view"
+    | "playlist_view"
+    | "artist_view"
+    | "search"
+  >("saved_tracks");
+  let library = $state<UserLibrary>({ playlist: [], artist: [], album: [] });
   let tracks = $state<PlaylistTrackObject[]>([]);
   let loading = $state(false);
+
+  let currentlyPlayingTrack = $state<PlaylistTrackObject | null>(null);
 
   let searchQuery = $state("");
   let searchResults = $state<SearchResponse | null>(null);
   let isSearching = $state(false);
-  let searchCategory = $state<"tracks" | "artists" | "albums" | "playlists">(
-    "tracks",
-  );
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -294,6 +296,7 @@
       console.log(message);
       switch (message.type) {
         case "libraryData":
+          console.log("library data", message.data)
           library = message.data;
           break;
         case "tracksData":
@@ -325,6 +328,7 @@
     index: number,
     tracksList: PlaylistTrackObject[],
   ) {
+    currentlyPlayingTrack = tracksList[index];
     const data = {
       type: "playTrack",
       trackId,
@@ -386,53 +390,33 @@
         }}
       />
     {/if}
-    
+
     {#if activeTab === "album"}
       <LibraryList
-        items={library.artist || []}
+        items={library.album || []}
         type="album"
         onSelect={(item) => {
-          activeTab = "artist_view";
+          activeTab = "album_view";
           loadTracks((item as Album).id, "album");
         }}
       />
     {/if}
 
-    {#if activeTab === "playlist_view" || activeTab === "artist_view"}
-      <div
-        class="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-xs border-b border-zinc-800/50"
-      >
-        <button
-          class="w-full flex items-center space-x-2 text-zinc-400 hover:text-white hover:bg-zinc-900 py-3 px-3 transition-all text-sm font-medium"
-          onclick={() =>
-            (activeTab =
-              activeTab === "playlist_view" ? "playlists" : "artists")}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            class="w-4 h-4"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-            />
-          </svg>
-          <span>Back</span>
-        </button>
-      </div>
-
-      {#if loading}
-        <div class="flex items-center justify-center p-8">
-          <p class="text-zinc-500 animate-pulse text-xs">Loading...</p>
-        </div>
-      {:else}
-        <TrackList {tracks} {playTrack} context="todo_context" />
-      {/if}
+    {#if activeTab === "playlist_view" || activeTab === "artist_view" || activeTab === "album_view"}
+      <TrackDetailView
+        {tracks}
+        {playTrack}
+        {loading}
+        context="todo_context"
+        onBack={() => {
+          let nextTab: "playlists" | "artists" | "album" =
+            activeTab === ("playlist_view" as const)
+              ? ("playlists" as const)
+              : ("artists" as const);
+          if (activeTab === "album_view") nextTab = "album" as const;
+          activeTab = nextTab;
+        }}
+      />
     {/if}
 
     {#if activeTab === "search"}
@@ -441,9 +425,10 @@
         {searchResults}
         {isSearching}
         {handleSearch}
-        bind:searchCategory
         {playTrack}
+        {tracks}
         {loadTracks}
+        {loading}
       />
     {/if}
   </div>

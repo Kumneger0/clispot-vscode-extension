@@ -104,6 +104,7 @@ export interface PlaylistTrackObject {
 export interface UserLibrary {
   playlist: Playlist[];
   artist: Artist[];
+  album: Album[];
 }
 
 export interface TracksResponse {

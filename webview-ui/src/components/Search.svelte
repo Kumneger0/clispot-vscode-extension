@@ -5,13 +5,15 @@
     TracksType,
   } from "../../../src/types/types.js";
   import LibraryList from "./LibraryList.svelte";
+  import TrackList from "./TrackList.svelte";
+  import TrackDetailView from "./TrackDetailView.svelte";
 
   interface Props {
     searchQuery: string;
     searchResults: SearchResponse | null;
     isSearching: boolean;
     handleSearch: () => void;
-    searchCategory: "tracks" | "artists" | "albums" | "playlists";
+    tracks: PlaylistTrackObject[];
     playTrack: (
       trackId: string,
       contextUri: string,
@@ -19,6 +21,7 @@
       tracksList: PlaylistTrackObject[],
     ) => void;
     loadTracks: (itemId: string, type: TracksType) => void;
+    loading?: boolean;
   }
 
   let {
@@ -26,10 +29,22 @@
     searchResults,
     isSearching,
     handleSearch,
-    searchCategory = $bindable(),
+    tracks,
     playTrack,
     loadTracks,
+    loading = false,
   }: Props = $props();
+
+  type ActiveTabTypes =
+    | "tracks"
+    | "playlists"
+    | "artists"
+    | "albums"
+    | "albums_view"
+    | "playlists_view"
+    | "artists_view";
+
+  let activeTab = $state<ActiveTabTypes>("playlists");
 </script>
 
 <div class="p-4 flex flex-col h-full">
@@ -55,13 +70,12 @@
     </div>
   {:else if searchResults}
     <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-      {#each ["tracks", "artists", "albums", "playlists"] as cat}
+      {#each ["tracks", "artists", "albums", "playlists"] satisfies ActiveTabTypes[] as cat}
         <button
-          class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors {searchCategory ===
-          cat
+          class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors {activeTab.startsWith(cat)
             ? 'bg-white text-black'
             : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}"
-          onclick={() => (searchCategory = cat as any)}
+          onclick={() => (activeTab = cat)}
         >
           {cat.charAt(0).toUpperCase() + cat.slice(1)} ({searchResults[
             cat as keyof SearchResponse
@@ -71,61 +85,69 @@
     </div>
 
     <div class="flex-1 overflow-y-auto min-h-0">
-      {#if searchCategory === "tracks" && searchResults.tracks.items?.length}
-        <div class="divide-y divide-zinc-900/50">
-          {#each searchResults.tracks.items as track, i}
-            <button
-              class="w-full group flex items-center space-x-3 p-3 hover:bg-white/5 transition-colors duration-200 text-left"
-              onclick={() =>
-                playTrack(
-                  track.id,
-                  "search_context",
-                  i,
-                  searchResults?.tracks.items?.map((t) => ({ track: t })) ?? [],
-                )}
-            >
-              <div
-                class="w-8 h-8 flex-none bg-zinc-800 rounded-sm flex items-center justify-center text-zinc-500"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  class="w-4 h-4"
-                >
-                  <path
-                    d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                  />
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <span
-                  class="block text-sm font-medium text-zinc-200 truncate group-hover:text-green-400"
-                  >{track.name}</span
-                >
-                <span class="block text-xs text-zinc-500 truncate"
-                  >{track.artists?.map((a) => a.name).join(", ")}</span
-                >
-              </div>
-            </button>
-          {/each}
-        </div>
-      {:else if searchCategory === "artists" && searchResults.artists.items?.length}
-      <LibraryList items={searchResults.artists.items} type="artist" onSelect={(item) => {
-        loadTracks(item.id, "followed_artist");
-      }} />
-      {:else if searchCategory === "albums" && searchResults.albums.items?.length}
-        <LibraryList
-          items={searchResults.albums.items}
-          type="album"
-          onSelect={(item) => {
-            loadTracks(item.id, "album");
-          }}
+      {#if activeTab === "tracks" && searchResults.tracks.items?.length}
+        <TrackList
+          tracks={searchResults.tracks.items.map((track) => ({ track }))}
+          {playTrack}
+          context="todo_context"
         />
-      {:else if searchCategory === "playlists" && searchResults.playlists.items?.length}
-        <LibraryList items={searchResults.playlists.items} type="playlist" onSelect={(item) => {
-          loadTracks(item.id, "playlist");
-        }} />
+      {:else if (activeTab === "artists" || activeTab == "artists_view") && searchResults.artists.items?.length}
+        {#if activeTab == "artists_view"}
+          <TrackDetailView
+            {tracks}
+            {playTrack}
+            {loading}
+            context="todo_context"
+            onBack={() => (activeTab = "artists")}
+          />
+        {:else}
+          <LibraryList
+            items={searchResults.artists.items}
+            type="artist"
+            onSelect={(item) => {
+              activeTab = "artists_view";
+              loadTracks(item.id, "followed_artist");
+            }}
+          />
+        {/if}
+      {:else if (activeTab === "albums" || activeTab == "albums_view") && searchResults.albums.items?.length}
+        {#if activeTab == "albums_view"}
+          <TrackDetailView
+            {tracks}
+            {playTrack}
+            {loading}
+            context="todo_context"
+            onBack={() => (activeTab = "albums")}
+          />
+        {:else}
+          <LibraryList
+            items={searchResults.albums.items}
+            type="album"
+            onSelect={(item) => {
+              activeTab = "albums_view";
+              loadTracks(item.id, "album");
+            }}
+          />
+        {/if}
+      {:else if (activeTab === "playlists" || activeTab == "playlists_view") && searchResults.playlists.items?.length}
+        {#if activeTab == "playlists_view"}
+          <TrackDetailView
+            {tracks}
+            {playTrack}
+            {loading}
+            context="todo_context"
+            onBack={() => (activeTab = "playlists")}
+          />
+        {:else}
+          <LibraryList
+            items={searchResults.playlists.items}
+            type="playlist"
+            onSelect={(item) => {
+              activeTab = "playlists_view";
+              loadTracks(item.id, "playlist");
+            }}
+          />
+        {/if}
       {/if}
     </div>
   {/if}
