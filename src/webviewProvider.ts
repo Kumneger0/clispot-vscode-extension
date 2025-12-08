@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { getLibrary, getTracks, Search } from './api.js';
+import { getMusicQueue } from './extension.js';
 
 export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'clispotLibrary';
@@ -51,9 +52,20 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
             }
         case 'playTrack':
             {
-                 vscode.commands.executeCommand('clispot.playTrackWebview', data);
-                 break;
+            // this block will only be called when the user clicks on a track which means isSkip will be true
+            vscode.commands.executeCommand('clispot.playTrackWebview', { ...data, isSkip: true });
+            break;
+          }
+        case 'getMusicQueue':
+          {
+            try {
+              const musicQueue = getMusicQueue();
+              webviewView.webview.postMessage({ type: 'musicQueueData', data: musicQueue });
+            } catch (e) {
+              vscode.window.showErrorMessage('Failed to fetch music queue');
             }
+            break;
+          }
             
         case "search":
           const query = data.query;
@@ -62,6 +74,10 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
           break;
       }
     });
+  }
+
+  public onQueueChange() {
+    this._view?.webview.postMessage({ type: 'musicQueueData', data: getMusicQueue() });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

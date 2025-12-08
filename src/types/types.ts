@@ -116,6 +116,14 @@ export interface PlayRequestBody {
   name: string;
   artists: string[];
   album: string;
+  isSkip: boolean;
+  queue: HeadlessQueue;
+}
+
+
+export interface HeadlessQueue {
+  tracks: PlaylistTrackObject[];
+  currentIndex: number;
 }
 
 

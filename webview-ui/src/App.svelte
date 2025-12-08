@@ -2,6 +2,7 @@
   import type {
     Album,
     Artist,
+    MusicQueue,
     Playlist,
     PlaylistTrackObject,
     SearchResponse,
@@ -11,7 +12,7 @@
 
   import type { WebviewApi } from "vscode-webview";
 
-    if (typeof acquireVsCodeApi === "undefined") {
+  if (typeof acquireVsCodeApi === "undefined") {
     (window as any).acquireVsCodeApi = () => ({
       postMessage: (message: any) => {
         console.log("Mock VS Code postMessage:", message);
@@ -25,7 +26,14 @@
                     { id: "1", name: "Mock Playlist 1", type: "playlist" },
                   ],
                   artist: [{ id: "2", name: "Mock Artist 1", type: "artist" }],
-                  album: [{ id: "3", name: "Mock Album 1", type: "album", images: [] }],
+                  album: [
+                    {
+                      id: "3",
+                      name: "Mock Album 1",
+                      type: "album",
+                      images: [],
+                    },
+                  ],
                 },
               },
               "*"
@@ -86,7 +94,7 @@
                         popularity: 0,
                       },
                     ],
-                    album: { name: "Search Album 1", images: [], id:'djdjd' },
+                    album: { name: "Search Album 1", images: [], id: "djdjd" },
                     duration_ms: 0,
                   },
                   {
@@ -106,7 +114,7 @@
                         popularity: 0,
                       },
                     ],
-                    album: { name: "Search Album 2", images: [], id:'jfjfjf' },
+                    album: { name: "Search Album 2", images: [], id: "jfjfjf" },
                     duration_ms: 0,
                   },
                 ],
@@ -153,8 +161,8 @@
                 previous: "",
                 total: 2,
                 items: [
-                  { name: "Search Album 1", images: [], id:'djdjdjjbb' },
-                  { name: "Search Album 2", images: [], id:'djdjd' },
+                  { name: "Search Album 1", images: [], id: "djdjdjjbb" },
+                  { name: "Search Album 2", images: [], id: "djdjd" },
                 ],
               },
               playlists: {
@@ -282,11 +290,15 @@
   let tracks = $state<PlaylistTrackObject[]>([]);
   let loading = $state(false);
 
-  let currentlyPlayingTrack = $state<PlaylistTrackObject | null>(null);
-
   let searchQuery = $state("");
   let searchResults = $state<SearchResponse | null>(null);
   let isSearching = $state(false);
+
+  let musicQueue = $state<MusicQueue | null>(null);
+
+  let currentlyPlayingTrack = $derived(
+    musicQueue?.Items[musicQueue?.currentIndex] || null
+  );
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -294,7 +306,6 @@
       console.log(message);
       switch (message.type) {
         case "libraryData":
-          console.log("library data", message.data)
           library = message.data;
           break;
         case "tracksData":
@@ -302,9 +313,11 @@
           loading = false;
           break;
         case "searchResult":
-          console.log("search result data", message.data);
           searchResults = message.data;
           isSearching = false;
+          break;
+        case "musicQueueData":
+          musicQueue = message.data;
           break;
       }
     });
@@ -324,13 +337,13 @@
     trackId: string,
     contextUri: string,
     index: number,
-    tracksList: PlaylistTrackObject[],
+    tracksList: PlaylistTrackObject[]
   ) {
     currentlyPlayingTrack = tracksList[index] || null;
+    musicQueue = { Items: tracksList, currentIndex: index };
     const data = {
       type: "playTrack",
       trackId,
-      contextUri,
       index,
       tracks: JSON.parse(JSON.stringify(tracksList)),
     };
@@ -363,7 +376,12 @@
           <p class="text-zinc-400 text-sm mb-1">No tracks</p>
         </div>
       {:else}
-        <TrackList {currentlyPlayingTrack} {tracks} {playTrack} context="saved_tracks" />
+        <TrackList
+          {currentlyPlayingTrack}
+          {tracks}
+          {playTrack}
+          context="saved_tracks"
+        />
       {/if}
     {/if}
 

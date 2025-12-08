@@ -80,7 +80,6 @@
           >
         </div>
       {:else}
-        <!-- Artist Icon -->
         <div
           class="w-10 h-10 bg-zinc-800 rounded-full flex-none flex items-center justify-center text-zinc-500 group-hover:text-zinc-300"
         >
@@ -108,7 +107,7 @@
           {item.name}
         </h3>
         <p class="text-xs text-zinc-500">
-          {type === "playlist" ? "Playlist" : "Artist"}
+          {type}
         </p>
       </div>
       <div class="text-zinc-600 group-hover:text-zinc-400">
