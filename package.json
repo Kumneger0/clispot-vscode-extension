@@ -95,6 +95,7 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
     "@types/eventsource": "^1.1.15",
     "eventsource": "^4.1.0"
   }
