@@ -22,20 +22,20 @@ Control your Spotify playback directly from VS Code. Browse your library, manage
 
 ## Requirements
 
-Before using this extension, you need to have **Clispot Core** installed and running:
+To use this extension, you only need to have **Clispot Core** installed on your system.
 
-1. **Install Clispot Core**: Follow the [installation guide](https://clispot-docs.vercel.app/core/installation/)
-2. **Authenticate with Spotify**: Run `clispot` in your terminal and authenticate with your Spotify account
-3. **Start Clispot**: The extension requires Clispot to be running (it starts automatically when you run `clispot`)
+**Install Clispot Core**: Follow the [installation guide](https://clispot-docs.vercel.app/core/installation/)
 
-> **Note**: This extension requires an active Spotify Premium subscription.
+The extension will automatically start Clispot Core in the background when you open VS Code. On first launch, you'll be prompted to authenticate with your Spotify account.
+
 
 ## Getting Started
 
 1. Install the extension from the VS Code Marketplace
-2. Ensure Clispot Core is installed and authenticated
-3. Click on the Clispot icon in the Activity Bar to open your library
-4. Start browsing and controlling your music!
+2. Ensure Clispot Core is installed on your system
+3. Open VS Code - the extension will automatically start Clispot Core
+4. Authenticate with Spotify when prompted (first time only)
+5. Click on the Clispot icon in the Activity Bar to browse your library
 
 ## Available Commands
 

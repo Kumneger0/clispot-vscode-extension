@@ -250,15 +250,18 @@ export async function activate(context: vscode.ExtensionContext) {
           }
         }
 
+
+        const isPlaying = data.isPlaying;
         const minutes = Math.floor(data.seconds / 60);
         const seconds = Math.floor(data.seconds % 60);
         const formattedTime = `${minutes}:${seconds
           .toString()
           .padStart(2, "0")}`;
-        if (currentPlayingTrackName) {
-          clispotStatusBarItem.text = `$(play) ${currentPlayingTrackName} [${formattedTime}]`;
+
+        if (isPlaying) {
+          clispotStatusBarItem.text = `${"$(play)"} ${currentPlayingTrackName} [${formattedTime}]`;
         } else {
-          clispotStatusBarItem.text = `$(play) Playing... [${formattedTime}]`;
+          clispotStatusBarItem.text = `${"$(debug-pause)"} Paused ${currentPlayingTrackName} [${formattedTime}]`;
         }
       }
     } catch (e) {

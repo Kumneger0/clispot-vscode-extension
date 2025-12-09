@@ -25,7 +25,7 @@
         {
           "id": "clispot-sidebar",
           "title": "Clispot",
-          "icon": "resources/clispot-logo.svg"
+          "icon": "resources/icon.png"
         }
       ]
     },
@@ -35,7 +35,7 @@
           "id": "clispotLibrary",
           "name": "My Library",
           "type": "webview",
-          "icon": "resources/clispot-logo.svg",
+          "icon": "resources/icon.png",
           "view": "clispotLibrary"
         }
       ]
@@ -43,11 +43,7 @@
     "commands": [
       {
         "command": "clispot.refreshLibrary",
-        "title": "Refresh Library",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
+        "title": "Refresh Library"
       },
       {
         "command": "clispot.togglePlayPause",
