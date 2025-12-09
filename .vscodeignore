@@ -5,6 +5,7 @@ node_modules/**
 src/**
 .gitignore
 .yarnrc
+webview-ui/**
 esbuild.js
 vsc-extension-quickstart.md
 **/tsconfig.json
