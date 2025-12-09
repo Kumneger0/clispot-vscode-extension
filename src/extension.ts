@@ -197,6 +197,17 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  vscode.commands.registerCommand("clispot.refreshLibrary", async () => {
+    try {
+      clispotWebviewProvider.onLibraryChange();
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        `Failed to refresh library: ${error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  });
+
   clispotStatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
     100

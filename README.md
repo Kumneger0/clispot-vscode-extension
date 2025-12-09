@@ -1,71 +1,78 @@
-# clispot README
+# Clispot VS Code Extension
 
-This is the README for your extension "clispot". After writing up a brief description, we recommend including the following sections.
+Control your Spotify playback directly from VS Code. Browse your library, manage playlists, search for music, and control playback without leaving your editor.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+✨ **Library Management**
+- Browse your liked songs, playlists, and followed artists
+- View playlist tracks and artist top tracks
+- Search for tracks, albums, artists, and playlists
 
-For example if there is an image subfolder under your extension project workspace:
+🎵 **Playback Control**
+- Play/pause tracks
+- Skip to next/previous track
+- Play tracks from your library or search results
+- View and manage your music queue
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+🎨 **Seamless Integration**
+- Dedicated sidebar view for your music library
+- Status bar integration showing currently playing track
+- Real-time updates via Server-Sent Events (SSE)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Before using this extension, you need to have **Clispot Core** installed and running:
+
+1. **Install Clispot Core**: Follow the [installation guide](https://github.com/yourusername/clispot#installation)
+2. **Authenticate with Spotify**: Run `clispot` in your terminal and authenticate with your Spotify account
+3. **Start Clispot**: The extension requires Clispot to be running (it starts automatically when you run `clispot`)
+
+> **Note**: This extension requires an active Spotify Premium subscription.
+
+## Getting Started
+
+1. Install the extension from the VS Code Marketplace
+2. Ensure Clispot Core is installed and authenticated
+3. Click on the Clispot icon in the Activity Bar to open your library
+4. Start browsing and controlling your music!
+
+## Available Commands
+
+Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
+
+- **Clispot: Toggle Play/Pause** - Play or pause the current track
+- **Clispot: Play Next Track** - Skip to the next track in the queue
+- **Clispot: Play Previous Track** - Go back to the previous track
+- **Clispot: Refresh Library** - Manually refresh your music library
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+This extension currently does not contribute any VS Code settings. Configuration is managed through Clispot Core.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- The extension requires Clispot Core to be running. If you encounter connection issues, ensure Clispot is running on `http://localhost:8281`
+- Real-time status updates require an active SSE connection
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+Initial release of Clispot VS Code Extension:
+- Library browsing (playlists, artists, liked songs)
+- Search functionality
+- Playback controls
+- Queue management
+- Status bar integration
 
-Initial release of ...
+## For More Information
 
-### 1.0.1
+- [Clispot Core Documentation](https://github.com/yourusername/clispot)
+- [Report Issues](https://github.com/yourusername/clispot/issues)
 
-Fixed issue #.
+## License
 
-### 1.1.0
+This project is licensed under the MIT License.
 
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Enjoy your music while you code! 🎵**
