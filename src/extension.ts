@@ -147,6 +147,56 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  vscode.commands.registerCommand("clispot.playNextTrack", async () => {
+    try {
+      musicQueue.currentIndex++;
+      const track = musicQueue.Items[musicQueue.currentIndex];
+      const requestBody: PlayRequestBody = {
+        trackID: track.track.id,
+        name: track.track.name,
+        artists: track.track.artists?.map((a: any) => a.name),
+        album: track.track.album.name,
+        isSkip: true,
+        queue: {
+          tracks: musicQueue.Items,
+          currentIndex: musicQueue.currentIndex,
+        },
+      };
+      await playTrack(requestBody);
+      clispotWebviewProvider.onQueueChange();
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        `Failed to play next track: ${error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  });
+
+  vscode.commands.registerCommand("clispot.playPreviousTrack", async () => {
+    try {
+      musicQueue.currentIndex--;
+      const track = musicQueue.Items[musicQueue.currentIndex];
+      const requestBody: PlayRequestBody = {
+        trackID: track.track.id,
+        name: track.track.name,
+        artists: track.track.artists?.map((a: any) => a.name),
+        album: track.track.album.name,
+        isSkip: true,
+        queue: {
+          tracks: musicQueue.Items,
+          currentIndex: musicQueue.currentIndex,
+        },
+      };
+      await playTrack(requestBody);
+      clispotWebviewProvider.onQueueChange();
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        `Failed to play previous track: ${error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  });
+
   clispotStatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
     100

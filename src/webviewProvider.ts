@@ -80,6 +80,10 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
     this._view?.webview.postMessage({ type: 'musicQueueData', data: getMusicQueue() });
   }
 
+  public onLibraryChange() {
+    this._view?.webview.postMessage({ type: 'libraryData', data: getLibrary() });
+  }
+
   private _getHtmlForWebview(webview: vscode.Webview) {
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'assets', 'index.js'));
     const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'assets', 'index.css'));

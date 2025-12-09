@@ -46,6 +46,14 @@
       {
         "command": "clispot.togglePlayPause",
         "title": "Toggle Play/Pause"
+      },
+      {
+        "command": "clispot.playNextTrack",
+        "title": "Play Next Track"
+      },
+      {
+        "command": "clispot.playPreviousTrack",
+        "title": "Play Previous Track"
       }
     ]
   },
