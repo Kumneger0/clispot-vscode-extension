@@ -316,12 +316,13 @@
           library = { savedTracks: library.savedTracks, ...message.data };
           break;
         case "tracksData":
-          if (message.context && message.context === "saved_tracks") {
-            library = { ...library, savedTracks: message.data };
-          } else {
-            tracks = message.data;
-            loading = false;
-          }
+if (message.context && message.context === "saved_tracks") {
+  library = { ...library, savedTracks: message.data };
+  loading = false;
+} else {
+  tracks = message.data;
+  loading = false;
+}
           break;
         case "searchResult":
           searchResults = message.data;
