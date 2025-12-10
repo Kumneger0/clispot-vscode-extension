@@ -286,7 +286,14 @@
     | "artist_view"
     | "search"
   >("saved_tracks");
-  let library = $state<UserLibrary>({ playlist: [], artist: [], album: [] });
+  let library = $state<UserLibrary & { savedTracks: PlaylistTrackObject[] }>({
+    playlist: [],
+    artist: [],
+    album: [],
+    savedTracks: [],
+  });
+
+  //this tracks can take any tracks whether from playlist, artist, album
   let tracks = $state<PlaylistTrackObject[]>([]);
   let loading = $state(false);
 
@@ -306,11 +313,15 @@
       console.log(message);
       switch (message.type) {
         case "libraryData":
-          library = message.data;
+          library = { savedTracks: library.savedTracks, ...message.data };
           break;
         case "tracksData":
-          tracks = message.data;
-          loading = false;
+          if (message.context && message.context === "saved_tracks") {
+            library = { ...library, savedTracks: message.data };
+          } else {
+            tracks = message.data;
+            loading = false;
+          }
           break;
         case "searchResult":
           searchResults = message.data;
@@ -367,18 +378,18 @@
 
   <div class="flex-1 overflow-y-auto w-full scrollbar-hide">
     {#if activeTab === "saved_tracks"}
-      {#if loading}
+      {#if loading && library?.savedTracks?.length === 0}
         <div class="flex items-center justify-center p-8">
           <p class="text-zinc-500 animate-pulse text-xs">Loading...</p>
         </div>
-      {:else if tracks.length === 0}
+      {:else if library?.savedTracks?.length === 0}
         <div class="flex flex-col items-center justify-center p-8 text-center">
           <p class="text-zinc-400 text-sm mb-1">No tracks</p>
         </div>
       {:else}
         <TrackList
           {currentlyPlayingTrack}
-          {tracks}
+          tracks={library.savedTracks}
           {playTrack}
           context="saved_tracks"
         />
