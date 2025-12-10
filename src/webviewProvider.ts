@@ -44,7 +44,7 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
             {
                 try {
                     const response = await getTracks(data.id, data.context);
-                    webviewView.webview.postMessage({ type: 'tracksData', data: response.tracks });
+                  webviewView.webview.postMessage({ type: 'tracksData', context: data.context, data: response.tracks });
                 } catch (e) {
                     vscode.window.showErrorMessage('Failed to fetch tracks');
                 }
