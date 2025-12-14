@@ -16,7 +16,6 @@
     tracks: PlaylistTrackObject[];
     playTrack: (
       trackId: string,
-      contextUri: string,
       index: number,
       tracksList: PlaylistTrackObject[],
     ) => void;
@@ -55,8 +54,6 @@
     { label: "Artists", value: "artists" },
     { label: "Albums", value: "albums" },
   ] 
-
-
 
 
 </script>

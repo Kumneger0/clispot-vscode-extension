@@ -4,7 +4,7 @@
   "description": "Clispot is a VS Code extension that allows you to control Clispot Core from within the editor.",
   "version": "0.0.4",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.102.1"
   },
   "icon": "resources/icon.png",
   "repository": {
