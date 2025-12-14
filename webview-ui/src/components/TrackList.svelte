@@ -5,7 +5,6 @@
     tracks: PlaylistTrackObject[];
     playTrack: (
       trackId: string,
-      contextUri: string,
       index: number,
       tracksList: PlaylistTrackObject[],
     ) => void;
@@ -23,7 +22,7 @@
     {@const isPlaying = currentlyPlayingTrack?.track?.id === item.track.id}
     <button
       class="w-full group flex items-center space-x-3 p-3 hover:bg-white/5 transition-colors duration-200 text-left"
-      onclick={() => playTrack(item.track.id, context, i, tracks)}
+      onclick={() => playTrack(item.track.id, i, tracks)}
     >
       <div
         class="w-4 flex-none flex items-center justify-center text-xs font-mono {isPlaying

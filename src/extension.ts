@@ -110,6 +110,7 @@ export async function activate(context: vscode.ExtensionContext) {
           Items: items,
           currentIndex,
         };
+
         clispotWebviewProvider.onQueueChange();
         vscode.window.showInformationMessage(
           `Playing: ${track.name} by ${artists.join(", ")}`
@@ -224,6 +225,7 @@ export async function activate(context: vscode.ExtensionContext) {
   eventSource.onmessage = async (event) => {
     try {
       const data = JSON.parse(event.data);
+
       if (data.currentIndex && data.currentIndex !== musicQueue.currentIndex) {
         musicQueue.currentIndex = data.currentIndex;
         clispotWebviewProvider.onQueueChange();
@@ -250,7 +252,7 @@ export async function activate(context: vscode.ExtensionContext) {
           }
         }
 
-
+        currentPlayingTrackName = item?.track?.name;
         const isPlaying = data.isPlaying;
         const minutes = Math.floor(data.seconds / 60);
         const seconds = Math.floor(data.seconds % 60);
@@ -259,9 +261,11 @@ export async function activate(context: vscode.ExtensionContext) {
           .padStart(2, "0")}`;
 
         if (isPlaying) {
-          clispotStatusBarItem.text = `${"$(play)"} ${currentPlayingTrackName} [${formattedTime}]`;
+          clispotStatusBarItem.text = `${"$(play)"} ${currentPlayingTrackName ? currentPlayingTrackName : ""
+            } [${formattedTime}]`;
         } else {
-          clispotStatusBarItem.text = `${"$(debug-pause)"} Paused ${currentPlayingTrackName} [${formattedTime}]`;
+          clispotStatusBarItem.text = `${"$(debug-pause)"} Paused ${currentPlayingTrackName ? currentPlayingTrackName : " "
+            } [${formattedTime}]`;
         }
       }
     } catch (e) {

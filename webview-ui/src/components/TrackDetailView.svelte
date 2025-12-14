@@ -8,7 +8,6 @@
     context?: string;
     playTrack: (
       trackId: string,
-      contextUri: string,
       index: number,
       tracksList: PlaylistTrackObject[],
     ) => void;

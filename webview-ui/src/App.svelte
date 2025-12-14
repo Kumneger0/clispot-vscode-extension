@@ -36,7 +36,7 @@
                   ],
                 },
               },
-              "*"
+              "*",
             );
           }, 100);
         }
@@ -62,7 +62,7 @@
                   },
                 ],
               },
-              "*"
+              "*",
             );
           }, 100);
         }
@@ -249,7 +249,7 @@
             };
             window.postMessage(
               { type: "searchResult", data: mockSearchResponse },
-              "*"
+              "*",
             );
           }, 300);
         }
@@ -275,6 +275,7 @@
   import LibraryList from "./components/LibraryList.svelte";
   import Search from "./components/Search.svelte";
   import TrackDetailView from "./components/TrackDetailView.svelte";
+  import Queue from "./components/Queue.svelte";
 
   let activeTab = $state<
     | "saved_tracks"
@@ -285,6 +286,7 @@
     | "playlist_view"
     | "artist_view"
     | "search"
+    | "queue"
   >("saved_tracks");
   let library = $state<UserLibrary & { savedTracks: PlaylistTrackObject[] }>({
     playlist: [],
@@ -302,9 +304,10 @@
   let isSearching = $state(false);
 
   let musicQueue = $state<MusicQueue | null>(null);
+  let alreadyPlayedTracks = $state<PlaylistTrackObject[]>([]);
 
   let currentlyPlayingTrack = $derived(
-    musicQueue?.Items[musicQueue?.currentIndex] || null
+    musicQueue?.Items[musicQueue?.currentIndex] || null,
   );
 
   onMount(() => {
@@ -328,6 +331,7 @@
           isSearching = false;
           break;
         case "musicQueueData":
+          updateAlreadyPlayedTracks(currentlyPlayingTrack);
           musicQueue = message.data;
           break;
       }
@@ -335,7 +339,6 @@
 
     vscode.postMessage({ type: "getLibrary" });
     loadTracks("saved_tracks", "saved_tracks");
-    console.log(library);
   });
 
   function loadTracks(id: string, type: TracksType) {
@@ -344,12 +347,23 @@
     vscode.postMessage({ type: "getTracks", id, context: type });
   }
 
+  function updateAlreadyPlayedTracks(trackToAdd?: PlaylistTrackObject | null) {
+    if (!trackToAdd) {
+      return;
+    }
+    alreadyPlayedTracks = [...alreadyPlayedTracks, trackToAdd]?.filter(
+      (track, i, arr) =>
+        arr.findIndex((t) => t.track.id == track.track.id) === i,
+    );
+  }
+
   function playTrack(
     trackId: string,
-    contextUri: string,
     index: number,
-    tracksList: PlaylistTrackObject[]
+    tracksList: PlaylistTrackObject[],
   ) {
+    const trackToAdd = musicQueue?.Items[musicQueue?.currentIndex];
+    if (trackToAdd) updateAlreadyPlayedTracks(trackToAdd);
     currentlyPlayingTrack = tracksList[index] || null;
     musicQueue = { Items: tracksList, currentIndex: index };
     const data = {
@@ -458,6 +472,15 @@
         {tracks}
         {loadTracks}
         {loading}
+      />
+    {/if}
+
+    {#if activeTab === "queue"}
+      <Queue
+        {musicQueue}
+        {playTrack}
+        onBack={() => (activeTab = "saved_tracks")}
+        playedTracks={alreadyPlayedTracks}
       />
     {/if}
   </div>
