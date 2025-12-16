@@ -104,6 +104,7 @@ export function createMockTrack(overrides?: Partial<Track>): Track {
 export function createMockPlaylistTrackObject(overrides?: Partial<PlaylistTrackObject>): PlaylistTrackObject {
   return {
     track: createMockTrack(),
+    isItFromQueue: false,
     ...overrides
   };
 }

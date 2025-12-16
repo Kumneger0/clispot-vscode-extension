@@ -13,6 +13,8 @@
     ) => void;
     onBack?: () => void;
     currentlyPlayingTrack: PlaylistTrackObject | null;
+    addToQueue?: (track: PlaylistTrackObject) => void;
+    removeFromQueue?: (track: PlaylistTrackObject) => void;
   }
 
   let {
@@ -22,6 +24,8 @@
     playTrack,
     onBack,
     currentlyPlayingTrack,
+    addToQueue,
+    removeFromQueue,
   }: Props = $props();
 </script>
 
@@ -57,5 +61,12 @@
     <p class="text-zinc-500 animate-pulse text-xs">Loading...</p>
   </div>
 {:else}
-  <TrackList {currentlyPlayingTrack} {tracks} {playTrack} {context} />
+  <TrackList
+    {currentlyPlayingTrack}
+    {tracks}
+    {playTrack}
+    {context}
+    {addToQueue}
+    {removeFromQueue}
+  />
 {/if}

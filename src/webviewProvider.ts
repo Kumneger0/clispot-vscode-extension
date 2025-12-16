@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import { getLibrary, getTracks, Search } from './api.js';
-import { getMusicQueue } from './extension.js';
+import { addTrack, getLibrary, getQueue, getTracks, removeTrackFromQueue, Search } from './api.js';
+import { getMusicQueueLocal, updateMusicQueueLocal } from './extension.js';
+import { message } from 'telegram/client/index.js';
 
 export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'clispotLibrary';
@@ -30,43 +31,71 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
-        case 'getLibrary': 
-            {
-                try {
-                const library = await getLibrary();
-                webviewView.webview.postMessage({ type: 'libraryData', data: library });
-                } catch (e) {
-                vscode.window.showErrorMessage('Failed to fetch library');
-                }
-                break;
+        case 'getLibrary':
+          {
+            try {
+              const library = await getLibrary();
+              webviewView.webview.postMessage({ type: 'libraryData', data: library });
+            } catch (e) {
+              vscode.window.showErrorMessage('Failed to fetch library');
             }
-        case 'getTracks': 
-            {
-                try {
-                    const response = await getTracks(data.id, data.context);
-                  webviewView.webview.postMessage({ type: 'tracksData', context: data.context, data: response.tracks });
-                } catch (e) {
-                    vscode.window.showErrorMessage('Failed to fetch tracks');
-                }
-                break;
+            break;
+          }
+        case 'getTracks':
+          {
+            try {
+              const response = await getTracks(data.id, data.context);
+              webviewView.webview.postMessage({ type: 'tracksData', context: data.context, data: response.tracks });
+            } catch (e) {
+              vscode.window.showErrorMessage('Failed to fetch tracks');
             }
+            break;
+          }
         case 'playTrack':
-            {
-            // this block will only be called when the user clicks on a track which means isSkip will be true
+          {
             vscode.commands.executeCommand('clispot.playTrackWebview', { ...data, isSkip: true });
             break;
           }
         case 'getMusicQueue':
           {
             try {
-              const musicQueue = getMusicQueue();
+              const musicQueue = getMusicQueueLocal();
               webviewView.webview.postMessage({ type: 'musicQueueData', data: musicQueue });
             } catch (e) {
               vscode.window.showErrorMessage('Failed to fetch music queue');
             }
             break;
           }
-            
+        case "addTrackToQueue": {
+          console.log('about to add track', data.track);
+          const result = await addTrack(data.track, data.index);
+          if (result.status === 'error') {
+            vscode.window.showErrorMessage(result.message);
+            return;
+          }
+          const newMusicQueue = await getQueue();
+          if (newMusicQueue) {
+            updateMusicQueueLocal(newMusicQueue);
+            webviewView.webview.postMessage({ type: 'musicQueueData', data: getMusicQueueLocal() });
+            vscode.window.showInformationMessage('Track added to queue');
+          }
+          break;
+        }
+        case "removeTrackFromQueue": {
+          console.log('track to remove', data.track);
+          const result = await removeTrackFromQueue(data.track);
+          if (result.status === 'error') {
+            vscode.window.showErrorMessage(result.message);
+            return;
+          }
+          const newMusicQueue = await getQueue();
+          if (newMusicQueue) {
+            updateMusicQueueLocal(newMusicQueue);
+            webviewView.webview.postMessage({ type: 'musicQueueData', data: getMusicQueueLocal() });
+            vscode.window.showInformationMessage('Track removed from queue');
+          }
+          break;
+        }
         case "search":
           const query = data.query;
           const response = await Search(query);
@@ -77,7 +106,7 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
   }
 
   public onQueueChange() {
-    this._view?.webview.postMessage({ type: 'musicQueueData', data: getMusicQueue() });
+    this._view?.webview.postMessage({ type: 'musicQueueData', data: getMusicQueueLocal() });
   }
 
   public onLibraryChange() {

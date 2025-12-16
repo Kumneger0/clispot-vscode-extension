@@ -1,7 +1,11 @@
 import { EventSource } from "eventsource"; // Import EventSource
 import * as vscode from "vscode";
-import { playTrack, togglePlayPause } from "./api.js";
-import { MusicQueue, PlayRequestBody } from "./types/types.js";
+import { playTrack, togglePlayPause, getQueue } from "./api.js";
+import {
+  MusicQueue,
+  PlaylistTrackObject,
+  PlayRequestBody,
+} from "./types/types.js";
 import { ClispotWebviewProvider } from "./webviewProvider.js";
 import { execFile } from "child_process";
 
@@ -10,17 +14,22 @@ let currentPlayingTrackName: string | undefined;
 let terminal: vscode.Terminal | undefined;
 
 let musicQueue: MusicQueue = {
-  Items: [],
+  tracks: [],
+  currentlyPlayingTrack: null,
   currentIndex: 0,
 };
 
 const TERMINAL_NAME = "CLISPOT_TUI";
 const command = "clispot --headless --disable-cache";
 
-export function getMusicQueue() {
+export function getMusicQueueLocal() {
   return musicQueue;
 }
 
+
+export const updateMusicQueueLocal = (newMusicQueue: MusicQueue) => {
+  musicQueue = newMusicQueue;
+}
 
 export async function activate(context: vscode.ExtensionContext) {
   if (!(await isClispotInstalled())) {
@@ -105,9 +114,11 @@ export async function activate(context: vscode.ExtensionContext) {
         },
       };
       try {
+        console.log("wtf is happening", requestBody);
         await playTrack(requestBody);
         musicQueue = {
-          Items: items,
+          tracks: items,
+          currentlyPlayingTrack: trackObj.track,
           currentIndex,
         };
 
@@ -120,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext) {
         clispotStatusBarItem.text = `$(play) ${currentPlayingTrackName}`;
         clispotStatusBarItem.show();
       } catch (error) {
-        console.log('error', error)
+        console.log("error", error);
         vscode.window.showErrorMessage(
           `Failed to play track: ${error instanceof Error ? error.message : String(error)
           }`
@@ -151,15 +162,15 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("clispot.playNextTrack", async () => {
     try {
       musicQueue.currentIndex++;
-      const track = musicQueue.Items[musicQueue.currentIndex];
+      const track = musicQueue.tracks[musicQueue.currentIndex];
       const requestBody: PlayRequestBody = {
         trackID: track.track.id,
         name: track.track.name,
-        artists: track.track.artists?.map((a: any) => a.name),
+        artists: track.track.artists?.map((a) => a.name),
         album: track.track.album.name,
         isSkip: true,
         queue: {
-          tracks: musicQueue.Items,
+          tracks: musicQueue.tracks,
           currentIndex: musicQueue.currentIndex,
         },
       };
@@ -176,15 +187,15 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand("clispot.playPreviousTrack", async () => {
     try {
       musicQueue.currentIndex--;
-      const track = musicQueue.Items[musicQueue.currentIndex];
+      const previousTrack = musicQueue.tracks[musicQueue.currentIndex];
       const requestBody: PlayRequestBody = {
-        trackID: track.track.id,
-        name: track.track.name,
-        artists: track.track.artists?.map((a: any) => a.name),
-        album: track.track.album.name,
+        trackID: previousTrack.track.id,
+        name: previousTrack.track.name,
+        artists: previousTrack.track.artists?.map((a) => a.name),
+        album: previousTrack.track.album.name,
         isSkip: true,
         queue: {
-          tracks: musicQueue.Items,
+          tracks: musicQueue.tracks,
           currentIndex: musicQueue.currentIndex,
         },
       };
@@ -226,19 +237,27 @@ export async function activate(context: vscode.ExtensionContext) {
     try {
       const data = JSON.parse(event.data);
 
+      if (musicQueue.tracks.length === 0 || !musicQueue.currentIndex) {
+        const newMusicQueue = await getQueue();
+        if (newMusicQueue) {
+          musicQueue = newMusicQueue;
+          clispotWebviewProvider.onQueueChange();
+        }
+      }
+
       if (data.currentIndex && data.currentIndex !== musicQueue.currentIndex) {
         musicQueue.currentIndex = data.currentIndex;
         clispotWebviewProvider.onQueueChange();
       }
       if (data.seconds !== undefined) {
-        const item = musicQueue.Items[musicQueue.currentIndex];
+        const item = musicQueue.tracks[musicQueue.currentIndex];
 
         if (item?.track) {
           const totalDurationInSeconds = item.track.duration_ms / 1000;
           const diff = totalDurationInSeconds - Number(data.seconds);
 
           if (diff < 3) {
-            const nextTrack = musicQueue.Items[musicQueue.currentIndex + 1];
+            const nextTrack = musicQueue.tracks[musicQueue.currentIndex + 1];
             if (!nextTrack) {
               return;
             }
@@ -246,7 +265,7 @@ export async function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand("clispot.playTrackWebview", {
               trackId: nextTrack.track.id,
               index: musicQueue.currentIndex + 1,
-              tracks: musicQueue.Items,
+              tracks: musicQueue.tracks,
               isSkip: false,
             });
           }
@@ -260,11 +279,11 @@ export async function activate(context: vscode.ExtensionContext) {
           .toString()
           .padStart(2, "0")}`;
 
-        if (isPlaying) {
-          clispotStatusBarItem.text = `${"$(play)"} ${currentPlayingTrackName ? currentPlayingTrackName : ""
+        if (!isPlaying) {
+          clispotStatusBarItem.text = `${"$(play)"} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ""
             } [${formattedTime}]`;
         } else {
-          clispotStatusBarItem.text = `${"$(debug-pause)"} Paused ${currentPlayingTrackName ? currentPlayingTrackName : " "
+          clispotStatusBarItem.text = `${"$(debug-pause)"} playing  ${currentPlayingTrackName ? currentPlayingTrackName : " "
             } [${formattedTime}]`;
         }
       }
