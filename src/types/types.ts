@@ -7,8 +7,12 @@ export interface Image {
 }
 
 export interface MusicQueue {
-  Items: PlaylistTrackObject[];
+  /**
+   * tracks means basically tracks that will be played if the queue is empty
+   */
+  tracks: PlaylistTrackObject[];
   currentIndex: number;
+  currentlyPlayingTrack: PlaylistTrackObject | null;
 }
 
 export interface ExternalUrls {
@@ -99,6 +103,7 @@ export interface Track {
 
 export interface PlaylistTrackObject {
   track: Track;
+  isItFromQueue: boolean;
 }
 
 export interface UserLibrary {

@@ -306,9 +306,7 @@
   let musicQueue = $state<MusicQueue | null>(null);
   let alreadyPlayedTracks = $state<PlaylistTrackObject[]>([]);
 
-  let currentlyPlayingTrack = $derived(
-    musicQueue?.Items[musicQueue?.currentIndex] || null,
-  );
+  let currentlyPlayingTrack = $state<PlaylistTrackObject | null>(null);
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -334,6 +332,7 @@ if (message.context && message.context === "saved_tracks") {
         case "musicQueueData":
           updateAlreadyPlayedTracks(currentlyPlayingTrack);
           musicQueue = message.data;
+          currentlyPlayingTrack = message.data.currentlyPlayingTrack ?? null
           break;
       }
     });
@@ -363,10 +362,10 @@ if (message.context && message.context === "saved_tracks") {
     index: number,
     tracksList: PlaylistTrackObject[],
   ) {
-    const trackToAdd = musicQueue?.Items[musicQueue?.currentIndex];
+    const trackToAdd = musicQueue?.tracks[musicQueue?.currentIndex];
     if (trackToAdd) updateAlreadyPlayedTracks(trackToAdd);
     currentlyPlayingTrack = tracksList[index] || null;
-    musicQueue = { Items: tracksList, currentIndex: index };
+    musicQueue = { tracks: tracksList, currentIndex: index };
     const data = {
       type: "playTrack",
       trackId,
@@ -375,6 +374,26 @@ if (message.context && message.context === "saved_tracks") {
     };
 
     vscode.postMessage(data);
+  }
+
+  function addToQueue(track: PlaylistTrackObject) {
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    console.log('currently playing track', currentlyPlayingTrack)
+    const manuallyAddedTracks = musicQueue?.tracks.filter((track) => track.isItFromQueue);
+    const index = manuallyAddedTracks?.length || 0;
+    vscode.postMessage({ type: "addTrackToQueue", track: track, index });
+  }
+
+  function removeFromQueue(track: PlaylistTrackObject) {
+    vscode.postMessage({ type: "removeTrackFromQueue", track: track });
   }
 
   function handleSearch() {
@@ -406,6 +425,8 @@ if (message.context && message.context === "saved_tracks") {
           {currentlyPlayingTrack}
           tracks={library.savedTracks}
           {playTrack}
+          {addToQueue}
+          {removeFromQueue}
           context="saved_tracks"
         />
       {/if}
@@ -450,6 +471,8 @@ if (message.context && message.context === "saved_tracks") {
         {tracks}
         {playTrack}
         {loading}
+        {addToQueue}
+        {removeFromQueue}
         context="todo_context"
         onBack={() => {
           let nextTab: "playlists" | "artists" | "album" =
@@ -473,15 +496,19 @@ if (message.context && message.context === "saved_tracks") {
         {tracks}
         {loadTracks}
         {loading}
+        {addToQueue}
+        {removeFromQueue}
       />
     {/if}
 
     {#if activeTab === "queue"}
       <Queue
+        {currentlyPlayingTrack}
         {musicQueue}
         {playTrack}
         onBack={() => (activeTab = "saved_tracks")}
         playedTracks={alreadyPlayedTracks}
+        {removeFromQueue}
       />
     {/if}
   </div>

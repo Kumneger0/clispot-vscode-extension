@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { UserLibrary, TracksResponse, PlayRequestBody, TracksType, PlaylistTrackObject, SearchResponse } from './types/types.js';
+import { UserLibrary, TracksResponse, PlayRequestBody, TracksType, PlaylistTrackObject, SearchResponse, MusicQueue } from './types/types.js';
 
-const BASE_URL = 'http://localhost:8282'; 
+const BASE_URL = 'http://localhost:8282';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
     try {
@@ -36,11 +36,66 @@ export async function playTrack(body: PlayRequestBody): Promise<any> {
     });
 }
 
-export async function togglePlayPause(): Promise<any> {
-    return request<any>('/player');
+export async function getQueue(): Promise<MusicQueue | null> {
+    try {
+        return request<MusicQueue>('/player/queue');
+    } catch (err) {
+        return null
+    }
 }
 
 
-export async function Search(query:string): Promise<SearchResponse> {
+type QueueUpdateAPIResponse = {
+    status: 'error' | 'success',
+    message: string,
+}
+
+export async function addTrack(track: PlaylistTrackObject, index: number) {
+    try {
+        return request<QueueUpdateAPIResponse>('/player/queue/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ track, index }),
+        });
+    } catch (err) {
+        return {
+            status: 'error',
+            message: err instanceof Error ? err.message : 'Failed to add track to queue',
+        };
+    }
+}
+
+export async function removeTrackFromQueue(track: PlaylistTrackObject) {
+    try {
+        return request<QueueUpdateAPIResponse>('/player/queue/remove', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ track }),
+        });
+    } catch (err) {
+        return {
+            status: 'error',
+            message: err instanceof Error ? err.message : 'Failed to remove track from queue',
+        };
+    }
+}
+
+export async function togglePlayPause(): Promise<any> {
+    try {
+        return request<any>('/player');
+    } catch (err) {
+        return {
+            status: 'error',
+            message: err instanceof Error ? err.message : 'Failed to toggle play/pause',
+        };
+    }
+}
+
+
+export async function Search(query: string): Promise<SearchResponse> {
     return request<SearchResponse>(`/search?q=${query}`);
 }

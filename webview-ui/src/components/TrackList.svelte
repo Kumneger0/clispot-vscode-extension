@@ -8,21 +8,26 @@
       index: number,
       tracksList: PlaylistTrackObject[],
     ) => void;
-    context?: string;
-    currentlyPlayingTrack: PlaylistTrackObject | null;
+    addToQueue?: (track: PlaylistTrackObject) => void;
+    removeFromQueue?: (track: PlaylistTrackObject) => void;
+    context:string, 
+    currentlyPlayingTrack: PlaylistTrackObject | null,
   }
 
 
-  let { tracks, playTrack, context = "saved_tracks", currentlyPlayingTrack }: Props = $props();
+  let { tracks, playTrack, context = "saved_tracks", currentlyPlayingTrack, addToQueue, removeFromQueue }: Props = $props();
 </script>
     
 
 <div class="divide-y divide-zinc-900/50">
   {#each tracks as item, i}
     {@const isPlaying = currentlyPlayingTrack?.track?.id === item.track.id}
-    <button
-      class="w-full group flex items-center space-x-3 p-3 hover:bg-white/5 transition-colors duration-200 text-left"
+    <div
+      class="w-full group flex items-center space-x-3 p-3 hover:bg-white/5 transition-colors duration-200 text-left cursor-pointer"
       onclick={() => playTrack(item.track.id, i, tracks)}
+      role="button"
+      tabindex="0"
+      onkeydown={(e) => e.key === "Enter" && playTrack(item.track.id, i, tracks)}
     >
       <div
         class="w-4 flex-none flex items-center justify-center text-xs font-mono {isPlaying
@@ -71,6 +76,38 @@
           >{item.track.artists?.map((a) => a.name).join(", ")}</span
         >
       </div>
-    </button>
+
+      {#if context === 'queue' && removeFromQueue}
+        <button
+          class="p-2 text-zinc-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          onclick={(e) => {
+            e.stopPropagation();
+            const trackToRemove:PlaylistTrackObject = {track:{...JSON.parse(JSON.stringify(item.track))}, isItFromQueue: true}
+            removeFromQueue(trackToRemove);
+          }}
+          title="Remove from Queue"
+          aria-label="Remove from Queue"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {:else if context !== 'queue' && addToQueue}
+        <button
+          class="p-2 text-zinc-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          onclick={(e) => {
+            e.stopPropagation();
+            const trackToAdd:PlaylistTrackObject = {track:{...JSON.parse(JSON.stringify(item.track))}, isItFromQueue: true}
+            addToQueue(trackToAdd);
+          }}
+          title="Add to Queue"
+          aria-label="Add to Queue"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      {/if}
+    </div>
   {/each}
 </div>

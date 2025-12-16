@@ -22,6 +22,8 @@
     loadTracks: (itemId: string, type: TracksType) => void;
     currentlyPlayingTrack:PlaylistTrackObject | null
     loading?: boolean;
+    addToQueue?: (track: PlaylistTrackObject) => void;
+    removeFromQueue?: (track: PlaylistTrackObject) => void;
   }
 
   let {
@@ -34,6 +36,8 @@
     currentlyPlayingTrack,
     loadTracks,
     loading = false,
+    addToQueue,
+    removeFromQueue,
   }: Props = $props();
 
   type ActiveTabTypes =
@@ -98,10 +102,12 @@
     <div class="flex-1 overflow-y-auto min-h-0">
       {#if activeTab === "tracks" && searchResults.tracks.items?.length}
         <TrackList
-          tracks={searchResults.tracks.items.map((track) => ({ track }))}
+          tracks={searchResults.tracks.items.map((track) => ({ track, isItFromQueue: false }))}
           {playTrack}
           context="todo_context"
           {currentlyPlayingTrack}
+          {addToQueue}
+          {removeFromQueue}
         />
       {:else if (activeTab === "artists" || activeTab == "artists_view") && searchResults.artists.items?.length}
         {#if activeTab == "artists_view"}
@@ -112,6 +118,8 @@
             context="todo_context"
             onBack={() => (activeTab = "artists")}
             {currentlyPlayingTrack}
+            {addToQueue}
+            {removeFromQueue}
           />
         {:else}
           <LibraryList
@@ -132,6 +140,8 @@
             context="todo_context"
             {currentlyPlayingTrack}
             onBack={() => (activeTab = "albums")}
+            {addToQueue}
+            {removeFromQueue}
           />
         {:else}
           <LibraryList
@@ -152,6 +162,8 @@
             {loading}
             context="todo_context"
             onBack={() => (activeTab = "playlists")}
+            {addToQueue}
+            {removeFromQueue}
           />
         {:else}
           <LibraryList
