@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { addTrack, getLibrary, getQueue, getTracks, removeTrackFromQueue, Search } from './api.js';
 import { getMusicQueueLocal, updateMusicQueueLocal } from './extension.js';
-import { message } from 'telegram/client/index.js';
 
 export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'clispotLibrary';
