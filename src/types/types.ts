@@ -12,7 +12,6 @@ export interface MusicQueue {
    */
   tracks: PlaylistTrackObject[];
   currentIndex: number;
-  currentlyPlayingTrack: PlaylistTrackObject | null;
 }
 
 export interface ExternalUrls {
