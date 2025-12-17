@@ -306,7 +306,7 @@
   let musicQueue = $state<MusicQueue | null>(null);
   let alreadyPlayedTracks = $state<PlaylistTrackObject[]>([]);
 
-  let currentlyPlayingTrack = $state<PlaylistTrackObject | null>(null);
+  let currentlyPlayingTrack = $derived(musicQueue?.tracks[musicQueue?.currentIndex] || null);
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -332,7 +332,6 @@ if (message.context && message.context === "saved_tracks") {
         case "musicQueueData":
           updateAlreadyPlayedTracks(currentlyPlayingTrack);
           musicQueue = message.data;
-          currentlyPlayingTrack = message.data.currentlyPlayingTrack ?? null
           break;
       }
     });
@@ -349,11 +348,12 @@ if (message.context && message.context === "saved_tracks") {
 
   function updateAlreadyPlayedTracks(trackToAdd?: PlaylistTrackObject | null) {
     if (!trackToAdd) {
+      console.log("no track to add");
       return;
     }
     alreadyPlayedTracks = [...alreadyPlayedTracks, trackToAdd]?.filter(
       (track, i, arr) =>
-        arr.findIndex((t) => t.track.id == track.track.id) === i,
+        arr.findIndex((t) => t?.track?.id == track?.track?.id) === i,
     );
   }
 
@@ -364,7 +364,6 @@ if (message.context && message.context === "saved_tracks") {
   ) {
     const trackToAdd = musicQueue?.tracks[musicQueue?.currentIndex];
     if (trackToAdd) updateAlreadyPlayedTracks(trackToAdd);
-    currentlyPlayingTrack = tracksList[index] || null;
     musicQueue = { tracks: tracksList, currentIndex: index };
     const data = {
       type: "playTrack",
@@ -377,19 +376,22 @@ if (message.context && message.context === "saved_tracks") {
   }
 
   function addToQueue(track: PlaylistTrackObject) {
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    console.log('currently playing track', currentlyPlayingTrack)
-    const manuallyAddedTracks = musicQueue?.tracks.filter((track) => track.isItFromQueue);
-    const index = manuallyAddedTracks?.length || 0;
-    vscode.postMessage({ type: "addTrackToQueue", track: track, index });
+    let index = musicQueue?.tracks.filter((track) => track.isItFromQueue)?.length || 0;
+    //add 1 to add the current track after previoully added
+    // the clispot core used append(tracks[:index], {this-track}, tracks[index:])
+    const currentIndex = (musicQueue?.currentIndex || 0) + index + 1;
+
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    console.log('current index', currentIndex)
+    vscode.postMessage({ type: "addTrackToQueue", track: track, index: currentIndex });
   }
 
   function removeFromQueue(track: PlaylistTrackObject) {
