@@ -15,7 +15,6 @@ let terminal: vscode.Terminal | undefined;
 
 let musicQueue: MusicQueue = {
   tracks: [],
-  currentlyPlayingTrack: null,
   currentIndex: 0,
 };
 
@@ -114,11 +113,9 @@ export async function activate(context: vscode.ExtensionContext) {
         },
       };
       try {
-        console.log("wtf is happening", requestBody);
         await playTrack(requestBody);
         musicQueue = {
           tracks: items,
-          currentlyPlayingTrack: trackObj.track,
           currentIndex,
         };
 

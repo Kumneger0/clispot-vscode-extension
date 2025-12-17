@@ -25,7 +25,7 @@
         {
           "id": "clispot-sidebar",
           "title": "Clispot",
-          "icon": "resources/icon.png"
+          "icon": "resources/icon.svg"
         }
       ]
     },
@@ -35,7 +35,7 @@
           "id": "clispotLibrary",
           "name": "My Library",
           "type": "webview",
-          "icon": "resources/icon.png",
+          "icon": "resources/icon-small.svg",
           "view": "clispotLibrary"
         }
       ]
