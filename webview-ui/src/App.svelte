@@ -1,268 +1,16 @@
 <script module lang="ts">
   import type {
-    Album,
-    Artist,
-    MusicQueue,
-    Playlist,
-    PlaylistTrackObject,
-    SearchResponse,
-    TracksType,
-    UserLibrary,
+      Album,
+      Artist,
+      MusicQueue,
+      Playlist,
+      PlaylistTrackObject,
+      SearchResponse,
+      TracksType,
+      UserLibrary,
   } from "../../src/types/types.js";
 
   import type { WebviewApi } from "vscode-webview";
-
-  if (typeof acquireVsCodeApi === "undefined") {
-    (window as any).acquireVsCodeApi = () => ({
-      postMessage: (message: any) => {
-        console.log("Mock VS Code postMessage:", message);
-        if (message.type === "getLibrary") {
-          setTimeout(() => {
-            window.postMessage(
-              {
-                type: "libraryData",
-                data: {
-                  playlist: [
-                    { id: "1", name: "Mock Playlist 1", type: "playlist" },
-                  ],
-                  artist: [{ id: "2", name: "Mock Artist 1", type: "artist" }],
-                  album: [
-                    {
-                      id: "3",
-                      name: "Mock Album 1",
-                      type: "album",
-                      images: [],
-                    },
-                  ],
-                },
-              },
-              "*",
-            );
-          }, 100);
-        }
-        if (message.type === "getTracks") {
-          setTimeout(() => {
-            window.postMessage(
-              {
-                type: "tracksData",
-                data: [
-                  {
-                    track: {
-                      id: "t1",
-                      name: "Mock Track 1",
-                      artists: [{ name: "Artist A" }],
-                    },
-                  },
-                  {
-                    track: {
-                      id: "t2",
-                      name: "Mock Track 2",
-                      artists: [{ name: "Artist B" }],
-                    },
-                  },
-                ],
-              },
-              "*",
-            );
-          }, 100);
-        }
-        if (message.type === "search") {
-          setTimeout(() => {
-            const mockSearchResponse: SearchResponse = {
-              tracks: {
-                href: "",
-                limit: 20,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 2,
-                items: [
-                  {
-                    id: "st1",
-                    name: "Search Track 1",
-                    artists: [
-                      {
-                        name: "Search Artist A",
-                        id: "sa1",
-                        type: "artist",
-                        uri: "",
-                        external_urls: { spotify: "" },
-                        href: "",
-                        followers: { total: 0, href: null },
-                        genres: [],
-                        images: [],
-                        popularity: 0,
-                      },
-                    ],
-                    album: { name: "Search Album 1", images: [], id: "djdjd" },
-                    duration_ms: 0,
-                  },
-                  {
-                    id: "st2",
-                    name: "Search Track 2",
-                    artists: [
-                      {
-                        name: "Search Artist B",
-                        id: "sa2",
-                        type: "artist",
-                        uri: "",
-                        external_urls: { spotify: "" },
-                        href: "",
-                        followers: { total: 0, href: null },
-                        genres: [],
-                        images: [],
-                        popularity: 0,
-                      },
-                    ],
-                    album: { name: "Search Album 2", images: [], id: "jfjfjf" },
-                    duration_ms: 0,
-                  },
-                ],
-              },
-              artists: {
-                href: "",
-                limit: 20,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 2,
-                items: [
-                  {
-                    id: "sa1",
-                    name: "Search Artist A",
-                    type: "artist",
-                    uri: "",
-                    external_urls: { spotify: "" },
-                    href: "",
-                    followers: { total: 0, href: null },
-                    genres: ["Pop"],
-                    images: [],
-                    popularity: 50,
-                  },
-                  {
-                    id: "sa2",
-                    name: "Search Artist B",
-                    type: "artist",
-                    uri: "",
-                    external_urls: { spotify: "" },
-                    href: "",
-                    followers: { total: 0, href: null },
-                    genres: ["Rock"],
-                    images: [],
-                    popularity: 60,
-                  },
-                ],
-              },
-              albums: {
-                href: "",
-                limit: 20,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 2,
-                items: [
-                  { name: "Search Album 1", images: [], id: "djdjdjjbb" },
-                  { name: "Search Album 2", images: [], id: "djdjd" },
-                ],
-              },
-              playlists: {
-                href: "",
-                limit: 20,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 2,
-                items: [
-                  {
-                    id: "sp1",
-                    name: "Search Playlist 1",
-                    type: "playlist",
-                    uri: "",
-                    external_urls: { spotify: "" },
-                    href: "",
-                    images: [],
-                    owner: {
-                      display_name: "User 1",
-                      external_urls: { spotify: "" },
-                      href: "",
-                      id: "u1",
-                      type: "user",
-                      uri: "",
-                    },
-                    public: true,
-                    collaborative: false,
-                    snapshot_id: "",
-                    tracks: { href: "", total: 10 },
-                    description: "",
-                  },
-                  {
-                    id: "sp2",
-                    name: "Search Playlist 2",
-                    type: "playlist",
-                    uri: "",
-                    external_urls: { spotify: "" },
-                    href: "",
-                    images: [],
-                    owner: {
-                      display_name: "User 2",
-                      external_urls: { spotify: "" },
-                      href: "",
-                      id: "u2",
-                      type: "user",
-                      uri: "",
-                    },
-                    public: true,
-                    collaborative: false,
-                    snapshot_id: "",
-                    tracks: { href: "", total: 5 },
-                    description: "",
-                  },
-                ],
-              },
-              shows: {
-                href: "",
-                limit: 0,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 0,
-                items: [],
-              },
-              episodes: {
-                href: "",
-                limit: 0,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 0,
-                items: [],
-              },
-              audiobooks: {
-                href: "",
-                limit: 0,
-                next: "",
-                offset: 0,
-                previous: "",
-                total: 0,
-                items: [],
-              },
-            };
-            window.postMessage(
-              { type: "searchResult", data: mockSearchResponse },
-              "*",
-            );
-          }, 300);
-        }
-      },
-      getState: () => {
-        return (window as any).vsCodeState;
-      },
-      setState: (state: any) => {
-        (window as any).vsCodeState = state;
-        console.log("Mock VS Code setState:", state);
-      },
-    });
-  }
 
   declare const acquireVsCodeApi: () => WebviewApi<{}>;
   const vscode = acquireVsCodeApi();
@@ -270,12 +18,12 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import Navigation from "./components/Navigation.svelte";
-  import TrackList from "./components/TrackList.svelte";
   import LibraryList from "./components/LibraryList.svelte";
+  import Navigation from "./components/Navigation.svelte";
+  import Queue from "./components/Queue.svelte";
   import Search from "./components/Search.svelte";
   import TrackDetailView from "./components/TrackDetailView.svelte";
-  import Queue from "./components/Queue.svelte";
+  import TrackList from "./components/TrackList.svelte";
 
   let activeTab = $state<
     | "saved_tracks"
@@ -306,7 +54,9 @@
   let musicQueue = $state<MusicQueue | null>(null);
   let alreadyPlayedTracks = $state<PlaylistTrackObject[]>([]);
 
-  let currentlyPlayingTrack = $derived(musicQueue?.tracks[musicQueue?.currentIndex] || null);
+  let currentlyPlayingTrack = $derived(
+    musicQueue?.tracks[musicQueue?.currentIndex] || null,
+  );
 
   onMount(() => {
     window.addEventListener("message", (event) => {
@@ -317,13 +67,13 @@
           library = { savedTracks: library.savedTracks, ...message.data };
           break;
         case "tracksData":
-if (message.context && message.context === "saved_tracks") {
-  library = { ...library, savedTracks: message.data };
-  loading = false;
-} else {
-  tracks = message.data;
-  loading = false;
-}
+          if (message.context && message.context === "saved_tracks") {
+            library = { ...library, savedTracks: message.data };
+            loading = false;
+          } else {
+            tracks = message.data;
+            loading = false;
+          }
           break;
         case "searchResult":
           searchResults = message.data;
@@ -348,7 +98,6 @@ if (message.context && message.context === "saved_tracks") {
 
   function updateAlreadyPlayedTracks(trackToAdd?: PlaylistTrackObject | null) {
     if (!trackToAdd) {
-      console.log("no track to add");
       return;
     }
     alreadyPlayedTracks = [...alreadyPlayedTracks, trackToAdd]?.filter(
@@ -376,22 +125,17 @@ if (message.context && message.context === "saved_tracks") {
   }
 
   function addToQueue(track: PlaylistTrackObject) {
-    let index = musicQueue?.tracks.filter((track) => track.isItFromQueue)?.length || 0;
+    let index =
+      musicQueue?.tracks.filter((track) => track.isItFromQueue)?.length || 0;
     //add 1 to add the current track after previoully added
     // the clispot core used append(tracks[:index], {this-track}, tracks[index:])
     const currentIndex = (musicQueue?.currentIndex || 0) + index + 1;
 
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    console.log('current index', currentIndex)
-    vscode.postMessage({ type: "addTrackToQueue", track: track, index: currentIndex });
+    vscode.postMessage({
+      type: "addTrackToQueue",
+      track: track,
+      index: currentIndex,
+    });
   }
 
   function removeFromQueue(track: PlaylistTrackObject) {
@@ -399,7 +143,6 @@ if (message.context && message.context === "saved_tracks") {
   }
 
   function handleSearch() {
-    console.log("is about to search", searchQuery);
     if (!searchQuery.trim()) return;
     isSearching = true;
     searchResults = null;
