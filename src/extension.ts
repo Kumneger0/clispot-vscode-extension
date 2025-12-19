@@ -1,13 +1,12 @@
+import { execFile } from "child_process";
 import { EventSource } from "eventsource"; // Import EventSource
 import * as vscode from "vscode";
-import { playTrack, togglePlayPause, getQueue } from "./api.js";
+import { getQueue, playTrack, togglePlayPause } from "./api.js";
 import {
   MusicQueue,
-  PlaylistTrackObject,
-  PlayRequestBody,
+  PlayRequestBody
 } from "./types/types.js";
 import { ClispotWebviewProvider } from "./webviewProvider.js";
-import { execFile } from "child_process";
 
 let clispotStatusBarItem: vscode.StatusBarItem;
 let currentPlayingTrackName: string | undefined;
@@ -141,12 +140,10 @@ export async function activate(context: vscode.ExtensionContext) {
     try {
       const response = await togglePlayPause();
       if (response.action === "paused") {
-        clispotStatusBarItem.text = `$(debug-pause) Paused`;
+        clispotStatusBarItem.text = `${"$(play)"} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ""}`;
       } else {
-        clispotStatusBarItem.text = `$(play) ${currentPlayingTrackName || "Playing..."
-          }`;
+        clispotStatusBarItem.text = `${"$(debug-pause)"} playing  ${currentPlayingTrackName ? currentPlayingTrackName : ""}`;
       }
-      vscode.window.showInformationMessage(`Player: ${response.action}`);
       clispotStatusBarItem.show();
     } catch (error) {
       vscode.window.showErrorMessage(
@@ -160,6 +157,10 @@ export async function activate(context: vscode.ExtensionContext) {
     try {
       musicQueue.currentIndex++;
       const track = musicQueue.tracks[musicQueue.currentIndex];
+      if (!track) {
+        vscode.window.showErrorMessage("Failed to Play Next Track");
+        return;
+      }
       const requestBody: PlayRequestBody = {
         trackID: track.track.id,
         name: track.track.name,
@@ -185,6 +186,10 @@ export async function activate(context: vscode.ExtensionContext) {
     try {
       musicQueue.currentIndex--;
       const previousTrack = musicQueue.tracks[musicQueue.currentIndex];
+      if (!previousTrack) {
+        vscode.window.showErrorMessage("Failed to Play Previous Track");
+        return;
+      }
       const requestBody: PlayRequestBody = {
         trackID: previousTrack.track.id,
         name: previousTrack.track.name,

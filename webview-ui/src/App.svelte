@@ -1,13 +1,13 @@
 <script module lang="ts">
   import type {
-      Album,
-      Artist,
-      MusicQueue,
-      Playlist,
-      PlaylistTrackObject,
-      SearchResponse,
-      TracksType,
-      UserLibrary,
+    Album,
+    Artist,
+    MusicQueue,
+    Playlist,
+    PlaylistTrackObject,
+    SearchResponse,
+    TracksType,
+    UserLibrary,
   } from "../../src/types/types.js";
 
   import type { WebviewApi } from "vscode-webview";
@@ -87,6 +87,7 @@
     });
 
     vscode.postMessage({ type: "getLibrary" });
+    vscode.postMessage({ type: "getMusicQueue" });
     loadTracks("saved_tracks", "saved_tracks");
   });
 

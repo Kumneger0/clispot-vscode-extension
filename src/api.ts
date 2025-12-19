@@ -40,7 +40,7 @@ export async function getQueue(): Promise<MusicQueue | null> {
     try {
         return request<MusicQueue>('/player/queue');
     } catch (err) {
-        return null
+        return null;
     }
 }
 
