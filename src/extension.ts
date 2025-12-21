@@ -4,7 +4,8 @@ import * as vscode from "vscode";
 import { getQueue, playTrack, togglePlayPause } from "./api.js";
 import {
   MusicQueue,
-  PlayRequestBody
+  PlayRequestBody,
+  SSEMessage
 } from "./types/types.js";
 import { ClispotWebviewProvider } from "./webviewProvider.js";
 
@@ -237,7 +238,22 @@ export async function activate(context: vscode.ExtensionContext) {
   eventSource.onerror = (err) => console.error("SSE error:", err);
   eventSource.onmessage = async (event) => {
     try {
-      const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data) as SSEMessage;
+      if (data.ytDlp) {
+        if (data.ytDlp.logType === 'warning') {
+          vscode.window.showWarningMessage(data.ytDlp.message);
+        }
+        if (data.ytDlp.logType === 'error') {
+          vscode.window.showErrorMessage(data.ytDlp.message);
+        }
+      }
+
+      if (!data.player) {
+        return;
+      }
+
+      const { isPlaying, currentIndex, secondsPlayed } = data.player;
+
 
       if (musicQueue.tracks.length === 0 || !musicQueue.currentIndex) {
         const newMusicQueue = await getQueue();
@@ -247,16 +263,16 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       }
 
-      if (data.currentIndex && data.currentIndex !== musicQueue.currentIndex) {
-        musicQueue.currentIndex = data.currentIndex;
+      if (currentIndex && currentIndex !== musicQueue.currentIndex) {
+        musicQueue.currentIndex = currentIndex;
         clispotWebviewProvider.onQueueChange();
       }
-      if (data.seconds !== undefined) {
+      if (secondsPlayed !== undefined) {
         const item = musicQueue.tracks[musicQueue.currentIndex];
 
         if (item?.track) {
           const totalDurationInSeconds = item.track.duration_ms / 1000;
-          const diff = totalDurationInSeconds - Number(data.seconds);
+          const diff = totalDurationInSeconds - Number(secondsPlayed);
 
           if (diff < 3) {
             const nextTrack = musicQueue.tracks[musicQueue.currentIndex + 1];
@@ -274,9 +290,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
 
         currentPlayingTrackName = item?.track?.name;
-        const isPlaying = data.isPlaying;
-        const minutes = Math.floor(data.seconds / 60);
-        const seconds = Math.floor(data.seconds % 60);
+        const minutes = Math.floor(secondsPlayed / 60);
+        const seconds = Math.floor(secondsPlayed % 60);
         const formattedTime = `${minutes}:${seconds
           .toString()
           .padStart(2, "0")}`;

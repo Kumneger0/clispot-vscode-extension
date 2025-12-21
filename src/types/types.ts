@@ -88,8 +88,8 @@ export interface Artist {
 
 export interface Album {
   name: string;
-  images: Image[]; 
-  id:string
+  images: Image[];
+  id: string
 }
 
 export interface Track {
@@ -194,7 +194,7 @@ export interface Episode {
 export interface Audiobook {
   authors: Author[];
   available_markets: string[];
-  copyrights: any[]; 
+  copyrights: any[];
   description: string;
   html_description: string;
   edition: string;
@@ -221,4 +221,23 @@ export interface SearchResponse {
   shows: Paging<Show>;
   episodes: Paging<Episode>;
   audiobooks: Paging<Audiobook>;
+}
+
+
+export type YtDlpLogs =
+  | 'warning'
+  | 'info'
+  | 'error'
+  | 'download'
+  | 'youtube'
+export type SSEMessage = {
+  player?: {
+    isPlaying: boolean
+    currentIndex: number
+    secondsPlayed: number
+  }
+  ytDlp?: {
+    message: string
+    logType: YtDlpLogs
+  }
 }
