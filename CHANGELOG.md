@@ -4,6 +4,30 @@ All notable changes to the "clispot" extension will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.2.0] - 2025-12-19
+
+### Fixed
+- Use monochromic SVGs
+- Load queues on mount
+
+### Changed
+- Publish on Open VSX
+
+## [0.1.0] - 2025-12-17
+
+### Added
+- Music queue component and simplified track playback
+- @tailwindcss/vite dependency
+
+### Fixed
+- "Add to queue" and "remove from queue" functionality
+- Reset loading state when data comes
+
+### Changed
+- Trigger publish workflow on tags instead of main branch
+- Migrated scripts and CI from pnpm to npm
+- Removed unused stuff and problematic imports
+
 ## [0.0.2] - 2025-12-09
 
 ### Added

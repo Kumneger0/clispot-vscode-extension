@@ -126,16 +126,17 @@
   }
 
   function addToQueue(track: PlaylistTrackObject) {
+    const  currentIndex = musicQueue?.currentIndex ?? 0
     let index =
-      musicQueue?.tracks.filter((track) => track.isItFromQueue)?.length || 0;
+      musicQueue?.tracks.filter((track, i) => track.isItFromQueue && i > currentIndex)?.length || 0;
     //add 1 to add the current track after previoully added
     // the clispot core used append(tracks[:index], {this-track}, tracks[index:])
-    const currentIndex = (musicQueue?.currentIndex || 0) + index + 1;
+    const indexToAddOn = (musicQueue?.currentIndex || 0) + index + 1;
 
     vscode.postMessage({
       type: "addTrackToQueue",
       track: track,
-      index: currentIndex,
+      index: indexToAddOn,
     });
   }
 

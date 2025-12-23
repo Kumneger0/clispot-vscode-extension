@@ -1,5 +1,8 @@
 # Clispot VS Code Extension
 
+> [!WARNING]
+> **Early Development**: This extension is currently in early development. You may encounter bugs or incomplete features. Please report any issues on our [GitHub repository](https://github.com/Kumneger0/clispot/issues).
+
 Control your Spotify playback directly from VS Code. Browse your library, manage playlists, search for music, and control playback without leaving your editor.
 
 ## Features
@@ -54,17 +57,6 @@ This extension currently does not contribute any VS Code settings. Configuration
 
 - The extension requires Clispot Core to be running. If you encounter connection issues, ensure Clispot is running on `http://localhost:8282`
 - Real-time status updates require an active SSE connection
-
-## Release Notes
-
-### 0.0.1
-
-Initial release of Clispot VS Code Extension:
-- Library browsing (playlists, artists, liked songs)
-- Search functionality
-- Playback controls
-- Queue management
-- Status bar integration
 
 ## For More Information
 
