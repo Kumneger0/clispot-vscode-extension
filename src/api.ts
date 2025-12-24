@@ -97,5 +97,5 @@ export async function togglePlayPause(): Promise<any> {
 
 
 export async function Search(query: string): Promise<SearchResponse> {
-    return request<SearchResponse>(`/search?q=${query}`);
+    return request<SearchResponse>(`/search?q=${encodeURIComponent(query)}`);
 }
