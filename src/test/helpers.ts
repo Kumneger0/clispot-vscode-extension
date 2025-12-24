@@ -1,8 +1,3 @@
-/**
- * Test helpers and mock utilities for Clispot VS Code Extension tests
- * These mocks are based on the core Go API implementation in internal/headless/headless.go
- */
-
 import { 
   UserLibrary, 
   TracksResponse, 
@@ -15,9 +10,7 @@ import {
   PlaylistTrackObject 
 } from '../types/types.js';
 
-/**
- * Mock fetch function that intercepts HTTP requests
- */
+
 export function createMockFetch() {
   const originalFetch = global.fetch;
   
@@ -31,9 +24,7 @@ export function createMockFetch() {
   };
 }
 
-/**
- * Create a mock successful response
- */
+
 export function createMockResponse<T>(data: T, status: number = 200): Response {
   return {
     ok: status >= 200 && status < 300,
@@ -44,9 +35,7 @@ export function createMockResponse<T>(data: T, status: number = 200): Response {
   } as Response;
 }
 
-/**
- * Create a mock error response
- */
+
 export function createMockErrorResponse(error: string, status: number = 500): Response {
   return {
     ok: false,
@@ -57,9 +46,6 @@ export function createMockErrorResponse(error: string, status: number = 500): Re
   } as Response;
 }
 
-/**
- * Mock data generators based on core API types
- */
 
 export function createMockArtist(overrides?: Partial<Artist>): Artist {
   return {
@@ -140,9 +126,6 @@ export function createMockPlaylist(overrides?: Partial<Playlist>): Playlist {
   };
 }
 
-/**
- * Mock API response generators matching core Go implementation
- */
 
 export function createMockLibraryResponse(): UserLibrary {
   return {
@@ -242,9 +225,6 @@ export function createMockSearchResponse(): SearchResponse {
   };
 }
 
-/**
- * Create a mock play response matching Go API: {"status": "ok", "message": "...", "track": {...}}
- */
 export function createMockPlayResponse(body: PlayRequestBody) {
   return {
     status: 'ok',
@@ -258,9 +238,7 @@ export function createMockPlayResponse(body: PlayRequestBody) {
   };
 }
 
-/**
- * Create a mock toggle play/pause response matching Go API: {"status": "ok", "action": "paused"|"play"}
- */
+
 export function createMockToggleResponse(action: 'paused' | 'play') {
   return {
     status: 'ok',
@@ -268,9 +246,6 @@ export function createMockToggleResponse(action: 'paused' | 'play') {
   };
 }
 
-/**
- * Mock API call handler that simulates the core Go server behavior
- */
 export function createMockApiHandler() {
   return async (url: string, options?: RequestInit): Promise<Response> => {
     const BASE_URL = 'http://localhost:8282';
@@ -278,12 +253,10 @@ export function createMockApiHandler() {
     const parsedUrl = new URL(fullUrl);
     const pathname = parsedUrl.pathname;
 
-    // GET /library
     if (pathname === '/library' && (!options || options.method === 'GET')) {
       return createMockResponse(createMockLibraryResponse());
     }
 
-    // GET /tracks?id=...&type=...
     if (pathname === '/tracks' && (!options || options.method === 'GET')) {
       const id = parsedUrl.searchParams.get('id');
       const type = parsedUrl.searchParams.get('type');
@@ -295,7 +268,6 @@ export function createMockApiHandler() {
       return createMockResponse(createMockTracksResponse());
     }
 
-    // GET /search?q=...
     if (pathname === '/search' && (!options || options.method === 'GET')) {
       const query = parsedUrl.searchParams.get('q');
       
@@ -306,12 +278,10 @@ export function createMockApiHandler() {
       return createMockResponse(createMockSearchResponse());
     }
 
-    // GET /player (toggle play/pause)
     if (pathname === '/player' && (!options || options.method === 'GET')) {
       return createMockResponse(createMockToggleResponse('paused'));
     }
 
-    // POST /player/play
     if (pathname === '/player/play' && options?.method === 'POST') {
       if (!options.body) {
         return createMockErrorResponse('request body required', 400);
@@ -332,7 +302,6 @@ export function createMockApiHandler() {
       return createMockResponse(createMockPlayResponse(body));
     }
 
-    // GET / (health check)
     if (pathname === '/' && (!options || options.method === 'GET')) {
       return {
         ok: true,
@@ -343,7 +312,6 @@ export function createMockApiHandler() {
       } as Response;
     }
 
-    // Unknown route
     return createMockErrorResponse('not found', 404);
   };
 }
