@@ -7,9 +7,7 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
 
   private _view?: vscode.WebviewView;
 
-  constructor(
-    private readonly _extensionUri: vscode.Uri,
-  ) { }
+  constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -21,51 +19,49 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       enableScripts: true,
 
-      localResourceRoots: [
-        this._extensionUri
-      ]
+      localResourceRoots: [this._extensionUri],
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
-        case 'getLibrary':
-          {
-            try {
-              const library = await getLibrary();
-              webviewView.webview.postMessage({ type: 'libraryData', data: library });
-            } catch (e) {
-              vscode.window.showErrorMessage('Failed to fetch library');
-            }
-            break;
+        case 'getLibrary': {
+          try {
+            const library = await getLibrary();
+            webviewView.webview.postMessage({ type: 'libraryData', data: library });
+          } catch (e) {
+            vscode.window.showErrorMessage('Failed to fetch library');
           }
-        case 'getTracks':
-          {
-            try {
-              const response = await getTracks(data.id, data.context);
-              webviewView.webview.postMessage({ type: 'tracksData', context: data.context, data: response.tracks });
-            } catch (e) {
-              vscode.window.showErrorMessage('Failed to fetch tracks');
-            }
-            break;
+          break;
+        }
+        case 'getTracks': {
+          try {
+            const response = await getTracks(data.id, data.context);
+            webviewView.webview.postMessage({
+              type: 'tracksData',
+              context: data.context,
+              data: response.tracks,
+            });
+          } catch (e) {
+            vscode.window.showErrorMessage('Failed to fetch tracks');
           }
-        case 'playTrack':
-          {
-            vscode.commands.executeCommand('clispot.playTrackWebview', { ...data, isSkip: true });
-            break;
+          break;
+        }
+        case 'playTrack': {
+          vscode.commands.executeCommand('clispot.playTrackWebview', { ...data, isSkip: true });
+          break;
+        }
+        case 'getMusicQueue': {
+          try {
+            const musicQueue = getMusicQueueLocal();
+            webviewView.webview.postMessage({ type: 'musicQueueData', data: musicQueue });
+          } catch (e) {
+            vscode.window.showErrorMessage('Failed to fetch music queue');
           }
-        case 'getMusicQueue':
-          {
-            try {
-              const musicQueue = getMusicQueueLocal();
-              webviewView.webview.postMessage({ type: 'musicQueueData', data: musicQueue });
-            } catch (e) {
-              vscode.window.showErrorMessage('Failed to fetch music queue');
-            }
-            break;
-          }
-        case "addTrackToQueue": {
+          break;
+        }
+        case 'addTrackToQueue': {
           console.log('about to add track', data.track);
           const result = await addTrack(data.track, data.index);
           if (result.status === 'error') {
@@ -80,7 +76,7 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
           }
           break;
         }
-        case "removeTrackFromQueue": {
+        case 'removeTrackFromQueue': {
           console.log('track to remove', data.track);
           const result = await removeTrackFromQueue(data.track);
           if (result.status === 'error') {
@@ -95,7 +91,7 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
           }
           break;
         }
-        case "search":
+        case 'search':
           const query = data.query;
           const response = await Search(query);
           webviewView.webview.postMessage({ type: 'searchResult', data: response });
@@ -113,8 +109,12 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'assets', 'index.js'));
-    const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'assets', 'index.css'));
+    const scriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'assets', 'index.js'),
+    );
+    const stylesUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'assets', 'index.css'),
+    );
 
     const nonce = getNonce();
 
