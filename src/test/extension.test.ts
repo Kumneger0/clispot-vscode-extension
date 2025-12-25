@@ -9,7 +9,7 @@ import {
   createMockTracksResponse,
   createMockSearchResponse,
   createMockPlaylistTrackObject,
-  createMockTrack
+  createMockTrack,
 } from './helpers';
 import { PlayRequestBody } from '../types/types';
 
@@ -61,7 +61,11 @@ suite('Extension API Test Suite', () => {
 
     mockFetch.mock(async (url) => {
       assert.ok(url.includes('/search'), 'URL should include /search');
-      assert.ok(url.includes(`q=${encodeURIComponent(query).replace(/%20/g, '+')}`) || url.includes(`q=${encodeURIComponent(query)}`), 'URL should include encoded query');
+      assert.ok(
+        url.includes(`q=${encodeURIComponent(query).replace(/%20/g, '+')}`) ||
+          url.includes(`q=${encodeURIComponent(query)}`),
+        'URL should include encoded query',
+      );
       return createMockResponse(mockData);
     });
 
@@ -78,8 +82,8 @@ suite('Extension API Test Suite', () => {
       isSkip: false,
       queue: {
         tracks: [],
-        currentIndex: 0
-      }
+        currentIndex: 0,
+      },
     };
 
     mockFetch.mock(async (url, options) => {
@@ -106,7 +110,7 @@ suite('Extension API Test Suite', () => {
   test('getQueue should return queue or null on error', async () => {
     const mockQueue = {
       currently_playing: createMockPlaylistTrackObject(),
-      queue: [createMockPlaylistTrackObject()]
+      queue: [createMockPlaylistTrackObject()],
     };
 
     mockFetch.mock(async (url) => {

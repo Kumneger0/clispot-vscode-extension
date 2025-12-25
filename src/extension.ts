@@ -1,13 +1,9 @@
-import { execFile } from "child_process";
-import { EventSource } from "eventsource"; // Import EventSource
-import * as vscode from "vscode";
-import { getQueue, playTrack, togglePlayPause } from "./api.js";
-import {
-  MusicQueue,
-  PlayRequestBody,
-  SSEMessage
-} from "./types/types.js";
-import { ClispotWebviewProvider } from "./webviewProvider.js";
+import { execFile } from 'child_process';
+import { EventSource } from 'eventsource'; // Import EventSource
+import * as vscode from 'vscode';
+import { getQueue, playTrack, togglePlayPause } from './api.js';
+import { MusicQueue, PlayRequestBody, SSEMessage } from './types/types.js';
+import { ClispotWebviewProvider } from './webviewProvider.js';
 
 let clispotStatusBarItem: vscode.StatusBarItem;
 let currentPlayingTrackName: string | undefined;
@@ -18,35 +14,32 @@ let musicQueue: MusicQueue = {
   currentIndex: 0,
 };
 
-const TERMINAL_NAME = "CLISPOT_TUI";
-const command = "clispot --headless --disable-cache";
+const TERMINAL_NAME = 'CLISPOT_TUI';
+const command = 'clispot --headless';
 
 export function getMusicQueueLocal() {
   return musicQueue;
 }
 
-
 export const updateMusicQueueLocal = (newMusicQueue: MusicQueue) => {
   musicQueue = newMusicQueue;
-}
+};
 
 export async function activate(context: vscode.ExtensionContext) {
   if (!(await isClispotInstalled())) {
     const action = await vscode.window.showErrorMessage(
-      "Clispot is not installed. Please install it from https://github.com/kumneger0/clispot",
-      "Take Me To Install Page"
+      'Clispot is not installed. Please install it from https://github.com/kumneger0/clispot',
+      'Take Me To Install Page',
     );
-    if (action === "Take Me To Install Page") {
+    if (action === 'Take Me To Install Page') {
       vscode.env.openExternal(
-        vscode.Uri.parse("https://github.com/Kumneger0/clispot/releases/latest")
+        vscode.Uri.parse('https://github.com/Kumneger0/clispot/releases/latest'),
       );
     }
     return;
   }
 
-  const existing = vscode.window.terminals.find(
-    (t) => t.name === TERMINAL_NAME
-  );
+  const existing = vscode.window.terminals.find((t) => t.name === TERMINAL_NAME);
   if (existing) {
     existing.show();
     terminal = existing;
@@ -60,41 +53,29 @@ export async function activate(context: vscode.ExtensionContext) {
   const isServerUp = await checkServerStatus();
   if (!isServerUp) {
     const action = await vscode.window.showErrorMessage(
-      "Failed to start Clispot server. Please try again. If the issue persists, consider opening an issue on our GitHub page: https://github.com/kumneger0/clispot",
-      "Open GitHub Page"
+      'Failed to start Clispot server. Please try again. If the issue persists, consider opening an issue on our GitHub page: https://github.com/kumneger0/clispot',
+      'Open GitHub Page',
     );
-    if (action === "Open GitHub Page") {
-      vscode.env.openExternal(
-        vscode.Uri.parse("https://github.com/Kumneger0/clispot/issues/new")
-      );
+    if (action === 'Open GitHub Page') {
+      vscode.env.openExternal(vscode.Uri.parse('https://github.com/Kumneger0/clispot/issues/new'));
     }
     return;
   }
 
-  const clispotWebviewProvider = new ClispotWebviewProvider(
-    context.extensionUri
-  );
+  const clispotWebviewProvider = new ClispotWebviewProvider(context.extensionUri);
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      "clispotLibrary",
-      clispotWebviewProvider
-    )
+    vscode.window.registerWebviewViewProvider('clispotLibrary', clispotWebviewProvider),
   );
 
   vscode.commands.registerCommand(
-    "clispot.playTrackWebview",
-    async (data: {
-      trackId: string;
-      index: number;
-      tracks: any[];
-      isSkip: boolean;
-    }) => {
+    'clispot.playTrackWebview',
+    async (data: { trackId: string; index: number; tracks: any[]; isSkip: boolean }) => {
       const items = data.tracks;
       const currentIndex = data.index;
       const trackObj = items[currentIndex];
       if (!trackObj || !trackObj.track) {
         vscode.window.showInformationMessage(
-          "Could not play the selected item. Please select a valid track."
+          'Could not play the selected item. Please select a valid track.',
         );
         return;
       }
@@ -120,46 +101,42 @@ export async function activate(context: vscode.ExtensionContext) {
         };
 
         clispotWebviewProvider.onQueueChange();
-        vscode.window.showInformationMessage(
-          `Playing: ${track.name} by ${artists.join(", ")}`
-        );
+        vscode.window.showInformationMessage(`Playing: ${track.name} by ${artists.join(', ')}`);
 
-        currentPlayingTrackName = `${track.name} - ${artists.join(", ")}`;
+        currentPlayingTrackName = `${track.name} - ${artists.join(', ')}`;
         clispotStatusBarItem.text = `$(play) ${currentPlayingTrackName}`;
         clispotStatusBarItem.show();
       } catch (error) {
-        console.log("error", error);
+        console.log('error', error);
         vscode.window.showErrorMessage(
-          `Failed to play track: ${error instanceof Error ? error.message : String(error)
-          }`
+          `Failed to play track: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
-    }
+    },
   );
 
-  vscode.commands.registerCommand("clispot.togglePlayPause", async () => {
+  vscode.commands.registerCommand('clispot.togglePlayPause', async () => {
     try {
       const response = await togglePlayPause();
-      if (response.action === "paused") {
-        clispotStatusBarItem.text = `${"$(play)"} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ""}`;
+      if (response.action === 'paused') {
+        clispotStatusBarItem.text = `${'$(play)'} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ''}`;
       } else {
-        clispotStatusBarItem.text = `${"$(debug-pause)"} playing  ${currentPlayingTrackName ? currentPlayingTrackName : ""}`;
+        clispotStatusBarItem.text = `${'$(debug-pause)'} playing  ${currentPlayingTrackName ? currentPlayingTrackName : ''}`;
       }
       clispotStatusBarItem.show();
     } catch (error) {
       vscode.window.showErrorMessage(
-        `Failed to toggle play/pause: ${error instanceof Error ? error.message : String(error)
-        }`
+        `Failed to toggle play/pause: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   });
 
-  vscode.commands.registerCommand("clispot.playNextTrack", async () => {
+  vscode.commands.registerCommand('clispot.playNextTrack', async () => {
     try {
       musicQueue.currentIndex++;
       const track = musicQueue.tracks[musicQueue.currentIndex];
       if (!track) {
-        vscode.window.showErrorMessage("Failed to Play Next Track");
+        vscode.window.showErrorMessage('Failed to Play Next Track');
         return;
       }
       const requestBody: PlayRequestBody = {
@@ -177,18 +154,17 @@ export async function activate(context: vscode.ExtensionContext) {
       clispotWebviewProvider.onQueueChange();
     } catch (error) {
       vscode.window.showErrorMessage(
-        `Failed to play next track: ${error instanceof Error ? error.message : String(error)
-        }`
+        `Failed to play next track: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   });
 
-  vscode.commands.registerCommand("clispot.playPreviousTrack", async () => {
+  vscode.commands.registerCommand('clispot.playPreviousTrack', async () => {
     try {
       musicQueue.currentIndex--;
       const previousTrack = musicQueue.tracks[musicQueue.currentIndex];
       if (!previousTrack) {
-        vscode.window.showErrorMessage("Failed to Play Previous Track");
+        vscode.window.showErrorMessage('Failed to Play Previous Track');
         return;
       }
       const requestBody: PlayRequestBody = {
@@ -206,36 +182,31 @@ export async function activate(context: vscode.ExtensionContext) {
       clispotWebviewProvider.onQueueChange();
     } catch (error) {
       vscode.window.showErrorMessage(
-        `Failed to play previous track: ${error instanceof Error ? error.message : String(error)
-        }`
+        `Failed to play previous track: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   });
 
-  vscode.commands.registerCommand("clispot.refreshLibrary", async () => {
+  vscode.commands.registerCommand('clispot.refreshLibrary', async () => {
     try {
       clispotWebviewProvider.onLibraryChange();
     } catch (error) {
       vscode.window.showErrorMessage(
-        `Failed to refresh library: ${error instanceof Error ? error.message : String(error)
-        }`
+        `Failed to refresh library: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   });
 
-  clispotStatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left,
-    100
-  );
-  clispotStatusBarItem.command = "clispot.togglePlayPause";
+  clispotStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  clispotStatusBarItem.command = 'clispot.togglePlayPause';
   clispotStatusBarItem.text = `$(debug-pause) Clispot (Paused)`;
-  clispotStatusBarItem.tooltip = "Toggle Play/Pause Clispot";
+  clispotStatusBarItem.tooltip = 'Toggle Play/Pause Clispot';
   context.subscriptions.push(clispotStatusBarItem);
   clispotStatusBarItem.show();
 
-  const eventSource = new EventSource("http://localhost:8282/events");
-  eventSource.onopen = () => console.log("SSE connected");
-  eventSource.onerror = (err) => console.error("SSE error:", err);
+  const eventSource = new EventSource('http://localhost:8282/events');
+  eventSource.onopen = () => console.log('SSE connected');
+  eventSource.onerror = (err) => console.error('SSE error:', err);
   eventSource.onmessage = async (event) => {
     try {
       const data = JSON.parse(event.data) as SSEMessage;
@@ -253,7 +224,6 @@ export async function activate(context: vscode.ExtensionContext) {
       }
 
       const { isPlaying, currentIndex, secondsPlayed } = data.player;
-
 
       if (musicQueue.tracks.length === 0 || !musicQueue.currentIndex) {
         const newMusicQueue = await getQueue();
@@ -280,7 +250,7 @@ export async function activate(context: vscode.ExtensionContext) {
               return;
             }
 
-            vscode.commands.executeCommand("clispot.playTrackWebview", {
+            vscode.commands.executeCommand('clispot.playTrackWebview', {
               trackId: nextTrack.track.id,
               index: musicQueue.currentIndex + 1,
               tracks: musicQueue.tracks,
@@ -292,20 +262,20 @@ export async function activate(context: vscode.ExtensionContext) {
         currentPlayingTrackName = item?.track?.name;
         const minutes = Math.floor(secondsPlayed / 60);
         const seconds = Math.floor(secondsPlayed % 60);
-        const formattedTime = `${minutes}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         if (!isPlaying) {
-          clispotStatusBarItem.text = `${"$(play)"} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ""
-            } [${formattedTime}]`;
+          clispotStatusBarItem.text = `${'$(play)'} Paused ${
+            currentPlayingTrackName ? currentPlayingTrackName : ''
+          } [${formattedTime}]`;
         } else {
-          clispotStatusBarItem.text = `${"$(debug-pause)"} playing  ${currentPlayingTrackName ? currentPlayingTrackName : " "
-            } [${formattedTime}]`;
+          clispotStatusBarItem.text = `${'$(debug-pause)'} playing  ${
+            currentPlayingTrackName ? currentPlayingTrackName : ' '
+          } [${formattedTime}]`;
         }
       }
     } catch (e) {
-      console.error("Failed to parse SSE message:", e);
+      console.error('Failed to parse SSE message:', e);
     }
   };
   context.subscriptions.push(new vscode.Disposable(() => eventSource.close()));
@@ -318,7 +288,7 @@ export function deactivate() {
 
 async function isClispotInstalled() {
   return await new Promise<boolean>((resolve) => {
-    execFile("clispot", ["version"], (err) => {
+    execFile('clispot', ['version'], (err) => {
       if (err) {
         resolve(false);
         return;
@@ -333,9 +303,9 @@ async function checkServerStatus() {
   return await new Promise<boolean>((resolve) => {
     setInterval(async () => {
       try {
-        const response = await fetch("http://localhost:8282");
+        const response = await fetch('http://localhost:8282');
         if (!response.ok) {
-          throw new Error("Failed to check server status");
+          throw new Error('Failed to check server status');
         }
         resolve(true);
       } catch (error) {

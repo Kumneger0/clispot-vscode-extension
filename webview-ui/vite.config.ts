@@ -9,7 +9,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../dist/webview'),
     emptyOutDir: true,
-    sourcemap:true,
+    sourcemap: true,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/[name].js',
@@ -21,6 +21,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-    }
-  }
+    },
+  },
 });

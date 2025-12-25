@@ -1,4 +1,4 @@
-export type TracksType = "playlist" | "followed_artist" | "saved_tracks" | "album_tracks";
+export type TracksType = 'playlist' | 'followed_artist' | 'saved_tracks' | 'album_tracks';
 
 export interface Image {
   url: string;
@@ -26,7 +26,6 @@ export interface Owner {
   uri: string;
   display_name: string;
 }
-
 
 export interface Paging<T> {
   href: string;
@@ -89,7 +88,7 @@ export interface Artist {
 export interface Album {
   name: string;
   images: Image[];
-  id: string
+  id: string;
 }
 
 export interface Track {
@@ -124,12 +123,10 @@ export interface PlayRequestBody {
   queue: HeadlessQueue;
 }
 
-
 export interface HeadlessQueue {
   tracks: PlaylistTrackObject[];
   currentIndex: number;
 }
-
 
 export interface Restrictions {
   reason: string;
@@ -223,21 +220,15 @@ export interface SearchResponse {
   audiobooks: Paging<Audiobook>;
 }
 
-
-export type YtDlpLogs =
-  | 'warning'
-  | 'info'
-  | 'error'
-  | 'download'
-  | 'youtube'
+export type YtDlpLogs = 'warning' | 'info' | 'error' | 'download' | 'youtube';
 export type SSEMessage = {
   player?: {
-    isPlaying: boolean
-    currentIndex: number
-    secondsPlayed: number
-  }
+    isPlaying: boolean;
+    currentIndex: number;
+    secondsPlayed: number;
+  };
   ytDlp?: {
-    message: string
-    logType: YtDlpLogs
-  }
-}
+    message: string;
+    logType: YtDlpLogs;
+  };
+};

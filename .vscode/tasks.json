@@ -1,35 +1,32 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "npm: watch:esbuild",
-            "type": "npm",
-            "script": "watch:esbuild",
-            "isBackground": true,
-            "problemMatcher": {
-                "owner": "esbuild",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": ".*"
-                    }
-                ],
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "\\[watch\\] build started",
-                    "endsPattern": "\\[watch\\] build finished"
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "reveal": "never"
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: watch:esbuild",
+      "type": "npm",
+      "script": "watch:esbuild",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "esbuild",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": [
+          {
+            "regexp": ".*"
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "\\[watch\\] build started",
+          "endsPattern": "\\[watch\\] build finished"
         }
-    ]
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "never"
+      }
+    }
+  ]
 }

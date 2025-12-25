@@ -8,17 +8,20 @@ Control your Spotify playback directly from VS Code. Browse your library, manage
 ## Features
 
 ✨ **Library Management**
+
 - Browse your liked songs, playlists, and followed artists
 - View playlist tracks and artist top tracks
 - Search for tracks, albums, artists, and playlists
 
 🎵 **Playback Control**
+
 - Play/pause tracks
 - Skip to next/previous track
 - Play tracks from your library or search results
 - View and manage your music queue
 
 🎨 **Seamless Integration**
+
 - Dedicated sidebar view for your music library
 - Status bar integration showing currently playing track
 - Real-time updates via Server-Sent Events (SSE)
@@ -30,7 +33,6 @@ To use this extension, you only need to have **Clispot Core** installed on your 
 **Install Clispot Core**: Follow the [installation guide](https://clispot-docs.vercel.app/core/installation/)
 
 The extension will automatically start Clispot Core in the background when you open VS Code. On first launch, you'll be prompted to authenticate with your Spotify account.
-
 
 ## Getting Started
 
