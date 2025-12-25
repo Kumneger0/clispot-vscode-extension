@@ -1,26 +1,33 @@
-# Contributing to Clispot VS Code Extension
+# Contributing to clispot-vscode-extension
 
 Working on the VS Code extension involves both the extension backend (TypeScript) and the Webview UI (Svelte 5).
 
 ## Development Setup
 
-1. **Prerequisites**:
+1. **Fork and Clone**:
+   - Fork the [clispot-vscode-extension](https://github.com/Kumneger0/clispot-vscode-extension) repository.
+   - Clone your fork locally:
+     ```bash
+     git clone https://github.com/YOUR_USERNAME/clispot-vscode-extension.git
+     cd clispot-vscode-extension
+     ```
+
+2. **Prerequisites**:
    - Node.js and npm.
    - VS Code.
    - **Clispot CLI**: The extension requires the `clispot` binary to be in your PATH. You also need valid Spotify credentials (see [Core Contributing Guide](../core/CONTRIBUTING.md)).
 
-2. **Installation**:
+3. **Installation**:
 
    ```bash
-   cd vscode-extension
    npm install
    ```
 
-3. **Running the Extension**:
+4. **Running the Extension**:
    - Open the `vscode-extension` folder in VS Code.
    - Press `F5` to open a new "Extension Development Host" window.
 
-4. **Webview Development**:
+5. **Webview Development**:
    - The UI is located in `webview-ui`.
    ```bash
    cd webview-ui
