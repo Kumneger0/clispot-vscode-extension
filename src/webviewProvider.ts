@@ -1,5 +1,14 @@
 import * as vscode from 'vscode';
-import { addTrack, checkServerStatus, getLibrary, getQueue, getTracks, isServerRunning, removeTrackFromQueue, Search } from './api.js';
+import {
+  addTrack,
+  checkServerStatus,
+  getLibrary,
+  getQueue,
+  getTracks,
+  isServerRunning,
+  removeTrackFromQueue,
+  Search,
+} from './api.js';
 import { getMusicQueueLocal, startClispot, updateMusicQueueLocal } from './extension.js';
 
 export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
@@ -7,7 +16,7 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
 
   private _view?: vscode.WebviewView;
 
-  constructor(private readonly _extensionUri: vscode.Uri) { }
+  constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -26,11 +35,9 @@ export class ClispotWebviewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       const isRunning = await isServerRunning();
-      console.log('response', isRunning);
       if (!isRunning) {
         startClispot();
         const isServerUp = await checkServerStatus();
-        console.log('is sever up', isServerUp);
         if (!isServerUp) {
           vscode.window.showErrorMessage('Failed to start Clispot');
           return;
