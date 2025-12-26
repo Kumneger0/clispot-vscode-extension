@@ -105,3 +105,31 @@ export async function togglePlayPause(): Promise<any> {
 export async function Search(query: string): Promise<SearchResponse> {
   return await request<SearchResponse>(`/search?q=${encodeURIComponent(query)}`);
 }
+
+
+export async function isServerRunning() {
+  try {
+    const response = await fetch('http://localhost:8282');
+    if (!response.ok) {
+      return false;
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+
+}
+export async function checkServerStatus() {
+  let retryCount = 0;
+  return await new Promise<boolean>((resolve) => {
+    setInterval(async () => {
+      if (await isServerRunning()) {
+        resolve(true);
+      }
+      retryCount++;
+      if (retryCount >= 5) {
+        resolve(false);
+      }
+    }, 1000);
+  });
+}
