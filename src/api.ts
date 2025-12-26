@@ -106,7 +106,6 @@ export async function Search(query: string): Promise<SearchResponse> {
   return await request<SearchResponse>(`/search?q=${encodeURIComponent(query)}`);
 }
 
-
 export async function isServerRunning() {
   try {
     const response = await fetch('http://localhost:8282');
@@ -117,17 +116,18 @@ export async function isServerRunning() {
   } catch (err) {
     return false;
   }
-
 }
 export async function checkServerStatus() {
   let retryCount = 0;
   return await new Promise<boolean>((resolve) => {
-    setInterval(async () => {
+    const intervalId = setInterval(async () => {
       if (await isServerRunning()) {
+        intervalId && clearInterval(intervalId);
         resolve(true);
       }
       retryCount++;
       if (retryCount >= 5) {
+        clearInterval(intervalId);
         resolve(false);
       }
     }, 1000);

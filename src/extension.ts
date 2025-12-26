@@ -25,15 +25,13 @@ export const updateMusicQueueLocal = (newMusicQueue: MusicQueue) => {
   musicQueue = newMusicQueue;
 };
 
-
-
 export function startClispot() {
   const existing = vscode.window.terminals.find((t) => t.name === TERMINAL_NAME);
   console.log('existing', existing);
   if (existing) {
-    existing.show();
     existing.sendText(command);
     terminal = existing;
+    terminal.hide();
   } else {
     const term = vscode.window.createTerminal(TERMINAL_NAME);
     console.log('term', term);
@@ -273,11 +271,13 @@ export async function activate(context: vscode.ExtensionContext) {
         const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         if (!isPlaying) {
-          clispotStatusBarItem.text = `${'$(play)'} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ''
-            } [${formattedTime}]`;
+          clispotStatusBarItem.text = `${'$(play)'} Paused ${
+            currentPlayingTrackName ? currentPlayingTrackName : ''
+          } [${formattedTime}]`;
         } else {
-          clispotStatusBarItem.text = `${'$(debug-pause)'} playing  ${currentPlayingTrackName ? currentPlayingTrackName : ' '
-            } [${formattedTime}]`;
+          clispotStatusBarItem.text = `${'$(debug-pause)'} playing  ${
+            currentPlayingTrackName ? currentPlayingTrackName : ' '
+          } [${formattedTime}]`;
         }
       }
     } catch (e) {
@@ -303,4 +303,3 @@ async function isClispotInstalled() {
     });
   });
 }
-
