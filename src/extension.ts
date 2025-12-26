@@ -1,7 +1,7 @@
 import { execFile } from 'child_process';
 import { EventSource } from 'eventsource'; // Import EventSource
 import * as vscode from 'vscode';
-import { getQueue, playTrack, togglePlayPause } from './api.js';
+import { checkServerStatus, getQueue, playTrack, togglePlayPause } from './api.js';
 import { MusicQueue, PlayRequestBody, SSEMessage } from './types/types.js';
 import { ClispotWebviewProvider } from './webviewProvider.js';
 
@@ -25,6 +25,24 @@ export const updateMusicQueueLocal = (newMusicQueue: MusicQueue) => {
   musicQueue = newMusicQueue;
 };
 
+
+
+export function startClispot() {
+  const existing = vscode.window.terminals.find((t) => t.name === TERMINAL_NAME);
+  console.log('existing', existing);
+  if (existing) {
+    existing.show();
+    existing.sendText(command);
+    terminal = existing;
+  } else {
+    const term = vscode.window.createTerminal(TERMINAL_NAME);
+    console.log('term', term);
+    term.sendText(command);
+    term.hide();
+    terminal = term;
+  }
+}
+
 export async function activate(context: vscode.ExtensionContext) {
   if (!(await isClispotInstalled())) {
     const action = await vscode.window.showErrorMessage(
@@ -39,17 +57,7 @@ export async function activate(context: vscode.ExtensionContext) {
     return;
   }
 
-  const existing = vscode.window.terminals.find((t) => t.name === TERMINAL_NAME);
-  if (existing) {
-    existing.show();
-    terminal = existing;
-  } else {
-    const term = vscode.window.createTerminal(TERMINAL_NAME);
-    term.sendText(command);
-    term.hide();
-    terminal = term;
-  }
-
+  startClispot();
   const isServerUp = await checkServerStatus();
   if (!isServerUp) {
     const action = await vscode.window.showErrorMessage(
@@ -265,13 +273,11 @@ export async function activate(context: vscode.ExtensionContext) {
         const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         if (!isPlaying) {
-          clispotStatusBarItem.text = `${'$(play)'} Paused ${
-            currentPlayingTrackName ? currentPlayingTrackName : ''
-          } [${formattedTime}]`;
+          clispotStatusBarItem.text = `${'$(play)'} Paused ${currentPlayingTrackName ? currentPlayingTrackName : ''
+            } [${formattedTime}]`;
         } else {
-          clispotStatusBarItem.text = `${'$(debug-pause)'} playing  ${
-            currentPlayingTrackName ? currentPlayingTrackName : ' '
-          } [${formattedTime}]`;
+          clispotStatusBarItem.text = `${'$(debug-pause)'} playing  ${currentPlayingTrackName ? currentPlayingTrackName : ' '
+            } [${formattedTime}]`;
         }
       }
     } catch (e) {
@@ -298,22 +304,3 @@ async function isClispotInstalled() {
   });
 }
 
-async function checkServerStatus() {
-  let retryCount = 0;
-  return await new Promise<boolean>((resolve) => {
-    setInterval(async () => {
-      try {
-        const response = await fetch('http://localhost:8282');
-        if (!response.ok) {
-          throw new Error('Failed to check server status');
-        }
-        resolve(true);
-      } catch (error) {
-        retryCount++;
-        if (retryCount >= 5) {
-          resolve(false);
-        }
-      }
-    }, 1000);
-  });
-}
